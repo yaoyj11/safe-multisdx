@@ -14,21 +14,23 @@ defcon sdxTagAclEntrySD(?Tag, ?SrcPrefix, ?DstPrefix) :-
   spec("user as tag access control list"),
   {
     sdxTagAclEntry($Tag, $SrcPrefix, $DstPrefix).
-    label("sdxTagAclEntry($DstPrefix)($Version)").
+    label("sdxTagAclEntry($SrcPrefix)($DstPrefix)($Version)").
   }.
 
 defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
-  ?TagToken := label("sdxTagAclEntry(?DstPrefix)($Version)"),
+  ?TagAclToken := label("sdxTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
   ?AuthASPolicy := label("authz as policy($PolicyVersion)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
-    link($TagToken).
+    link($TagAclToken).
     link($AuthASPolicy).
     link($TagPrivPolicy).
     label("SD Policy Set/$SrcPrefix/$DstPrefix($Version)").
   }.
 
-defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix), sdPolicySet(?SrcPrefix,?DstPrefix)].
+defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
+
+defpost postSdPolicySet(?SrcPrefix,?DstPrefix) :- [sdPolicySet(?SrcPrefix,?DstPrefix)].
 
 defcon authorizeASPolicy():-
   {
@@ -177,7 +179,7 @@ defpost postInitRoute(?DstIP,?Path,?Target,?Len) :- [startRoute(?DstIP,?Path,?Ta
 defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("sdxTagAclEntry(?DstIP)($Version)"),
+  ?AuthzASACL := label("sdxTagAclEntry(?SrcIP)(?DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).
