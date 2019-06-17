@@ -57,9 +57,9 @@ defcall postPathTokenSD(?ServerJVM,?ServerPrincipal,?Envs,?Token,?FromIP,?DstIP,
 
 defcall postASTagAclEntrySDSet(?SpeakerJVM,?Speaker,?SpeakerEnvs,?Tag,?Prefix, ?PrefixPeer):-
   {
-     postASTagAclEntrySD($SpeakerJVM,$Speaker,$SpeakerEnvs,$Tag,$PrefixPeer, $Prefix).
+//     postASTagAclEntrySD($SpeakerJVM,$Speaker,$SpeakerEnvs,$Tag,$PrefixPeer, $Prefix).
      postASTagAclEntrySD($SpeakerJVM,$Speaker,$SpeakerEnvs,$Tag,$Prefix,$PrefixPeer).
-     postSdPolicySet($SpeakerJVM,$Speaker,$SpeakerEnvs,$Prefix,$PrefixPeer).
+//     postSdPolicySet($SpeakerJVM,$Speaker,$SpeakerEnvs,$Prefix,$PrefixPeer).
   }.
 
 advertisePath(?SpeakerJVM,?Speaker,?TargetJVM,?Target,?AdvertiseEnvs,?UpdateEnvs,?DstIP,?Path,?Src,?Len,?Len1):-
@@ -88,7 +88,7 @@ defcall verifyRouteSD(?ServerJVM,?ServerPrincipal,?Envs,?FromIP,?DstIP,?Path,?Sr
     verifyRouteSD($ServerJVM,$ServerPrincipal,$Envs,$FromIP,$DstIP,$Path,$Src,$Len).
   }.
 
-defcall verifyCompliantPath(?ServerJVM,?ServerPrincipal,?Envs,?Owner,?FromIP,?DstIP,?AS,?Token1,?Token2):-
+defcall verifyCompliantPath(?ServerJVM,?ServerPrincipal,?Envs,?Owner,?FromIP,?DstIP,?Path,?Token1,?Token2):-
   {
-    verifyRouteSD($ServerJVM,$ServerPrincipal,$Envs,$Owner,$FromIP,$DstIP,$AS,$Token1,$Token2).
+    verifyCompliantPath($ServerJVM,$ServerPrincipal,$Envs,$Owner,$FromIP,$DstIP,$Path,$Token1,$Token2).
   }.

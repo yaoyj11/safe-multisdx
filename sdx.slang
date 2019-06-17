@@ -16,8 +16,6 @@ defcon sdxTagAclEntrySD(?Tag, ?SrcPrefix, ?DstPrefix) :-
     label("sdxTagAclEntry($DstPrefix)($Version)").
   }.
 
-defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
-
 defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
   ?TagAclToken := label("sdxTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
   ?IPToken := label("Token for IP allocation/?SrcPrefix($Version)"),
@@ -32,6 +30,8 @@ defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
   }.
 
 defpost postSdPolicySet(?SrcPrefix,?DstPrefix) :- [sdPolicySet(?SrcPrefix,?DstPrefix)].
+
+defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix), sdxTagAclEntrySD(?Tag, ?DstPrefix, ?SrcPrefix), sdPolicySet(?SrcPrefix, ?DstPrefix)].
 
 defcon authorizeASPolicy():-
   {
