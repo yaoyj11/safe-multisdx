@@ -2,9 +2,9 @@
 //  spec("Load the principal keypair"),
 //  principal($1).
 
-defenv Version() :- "set152".
-defenv PolicyVersion() :- "policy152".
-defenv GeniRoot() :- "w5o9SVFI94-7hYMIUFeAbwunD1pMX_agEnohn8-yBZo=".
+defenv Version() :- "set200".
+defenv PolicyVersion() :- "policy200".
+defenv GeniRoot() :- "w5o9SVFI94-7hYMIUFeAbwunD1pMX_agEnohn8-yBZo".
 
 defenv MyAnchorSet() :- anchorSet().
 

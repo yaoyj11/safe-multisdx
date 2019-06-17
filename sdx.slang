@@ -1,6 +1,5 @@
-import("../stitch-all.slang").
+import("../stitch.slang").
 //cannot use as tag here
-
 defcon sdxTagAclEntry(?Tag,?Prefix) :-
   spec("user as tag access control list"),
   {
@@ -14,8 +13,10 @@ defcon sdxTagAclEntrySD(?Tag, ?SrcPrefix, ?DstPrefix) :-
   spec("user as tag access control list"),
   {
     sdxTagAclEntry($Tag, $SrcPrefix, $DstPrefix).
-    label("sdxTagAclEntry($SrcPrefix)($DstPrefix)($Version)").
+    label("sdxTagAclEntry($DstPrefix)($Version)").
   }.
+
+defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
 
 defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
   ?TagAclToken := label("sdxTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
@@ -30,8 +31,6 @@ defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
     label("SD Policy Set/$SrcPrefix/$DstPrefix($Version)").
   }.
 
-defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
-
 defpost postSdPolicySet(?SrcPrefix,?DstPrefix) :- [sdPolicySet(?SrcPrefix,?DstPrefix)].
 
 defcon authorizeASPolicy():-
@@ -45,34 +44,32 @@ defcon authorizeASPolicy():-
       ?Prefix <: ?PrefixSet,
       tagPrivilege(?Tag, ?AS).
 
-    authorizedAS(?AS, ?SrcIP, ?DstIP):-
-      authorizedASByUserAttr(?AS, ?SrcIP, ?DstIP).
+    authorizedAS(?AS, ?FromIP, ?DstIP):-
+      authorizedASByUserAttr(?AS, ?FromIP, ?DstIP).
 
-    authorizedASByUserAttr(?AS, ?SrcIP, ?DstIP):-
+    authorizedASByUserAttr(?AS, ?FromIP, ?DstIP):-
       sdxTagAclEntry(?Tag, ?SrcPrefix, ?DstPrefix),
-      ?SrcIP <: ?SrcPrefix,
+      ?FromIP <: ?SrcPrefix,
       ?DstIP <: ?DstPrefix,
       tagPrivilege(?Tag, ?AS).
 
     label("authz as policy($PolicyVersion)").
   }.
 
-defpost postAuthorizeASPolicy() :- [authorizeASPolicy()].
-
 defcon verifyASPolicy():-
   {
      verifyAS(?Owner, ?DstIP, ?AS):-
         ?Owner: authorizedAS(?AS, ?DstIP).
 
-     verifyAS(?Owner, ?SrcIP, ?DstIP, ?AS):-
-        ?Owner: authorizedAS(?AS, ?SrcIP, ?DstIP).
+     verifyAS(?Owner, ?FromIP, ?DstIP, ?AS):-
+        ?Owner: authorizedAS(?AS, ?FromIP, ?DstIP).
 
      label("verify as policy($PolicyVersion)").
   }.
 
 definit verifyASPolicy().
 
-defpost postVerifyASPolicy() :- [verifyASPolicy()].
+defpost postAuthorizeASPolicy() :- [authorizeASPolicy()].
 
 defcon routingPolicy() :-
   {
@@ -93,44 +90,33 @@ defcon routingPolicy() :-
       authorizedAdvertise(?Owner,?DstIPRange,?Tail,?Head),
       ?DstIP <: ?DstIPRange.
 
-    route(?Owner,?SrcIP,?DstIP,?Path) :-
-      authorizedAdvertise(?Owner,?SrcIPRange,?DstIPRange,?Path,$Self),
-      ?SrcIP <: ?SrcIPRange,
+    route(?Owner,?FromIP,?DstIP,?Path) :-
+      authorizedAdvertise(?Owner,?FromIPRange,?DstIPRange,?Path,$Self),
+      ?FromIP <: ?FromIPRange,
       ?DstIP <: ?DstIPRange.
 
-    authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,?AS):-
+    authorizedAdvertise(?Owner,?FromIP,?DstIP,?Path,?AS):-
       eq([?Owner|?Tail],?Path),
       eq(?Tail,[]),
-      ?Owner: advertise(?SrcIP,?DstIP,?Path,?AS),
+      ?Owner: advertise(?FromIP,?DstIP,?Path,?AS),
       ownPrefix(?Owner,?DstIP).
 
-    authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,?AS):-
+    authorizedAdvertise(?Owner,?FromIP,?DstIP,?Path,?AS):-
       eq([?Head|?Tail],?Path),
-      ?Head:advertise(?SrcIP,?DstIP,?Path,?AS),
-      ?Owner: authorizedAS(?Head,?SrcIP,?DstIP),
-      authorizedAdvertise(?Owner,?SrcIPRange,?DstIPRange,?Tail,?Head),
-      ?SrcIP <: ?SrcIPRange,
+      ?Head:advertise(?FromIP,?DstIP,?Path,?AS),
+      ?Owner: authorizedAS(?Head,?FromIP,?DstIP),
+      authorizedAdvertise(?Owner,?FromIPRange,?DstIPRange,?Tail,?Head),
+      ?FromIP <: ?FromIPRange,
       ?DstIP <: ?DstIPRange.
 
-    compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
+    compliantPath(?Owner,?FromIP,?DstIP,?Path) :-
       eq([?Owner|?Tail],?Path),
-      eq(?Tail,[]),
-      ownPrefix(?Owner, ?DstIP).
+      eq(?Tail,[]).
 
-    compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
-      eq([?Owner|?Tail],?Path),
-      compliantPath(?Owner, ?SrcIP, ?DstIP, ?Tail).
-
-    compliantPath(?Owner, ?SrcIP, ?DstIP, ?Path) :-
+    compliantPath(?Owner, ?FromIP, ?DstIP, ?Path) :-
       eq([?Head|?Tail],?Path),
-      eq(?Tail,[]),
-      ?Owner: authorizedAS(?Head, ?SrcIP, ?DstIP).
-
-    compliantPath(?Owner, ?SrcIP, ?DstIP, ?Path) :-
-      eq([?Head|?Tail],?Path),
-      ?Owner: authorizedAS(?Head, ?SrcIP, ?DstIP),
-      compliantPath(?Owner, ?SrcIP, ?DstIP, ?Tail).
- 20     postInitRoute($ServerJVM,$ServerPrincipal,$Envs,$DstIP,$Path,$Target,$Len).           
+      ?Owner: authorizedAS(?Head, ?FromIP, ?DstIP),
+      compliantPath(?Owner, ?FromIP, ?DstIP, ?Tail).
 
     label("routing policy($PolicyVersion)").
   }.
@@ -150,17 +136,17 @@ defcon advertiseRoute(?DstIP,?Path,?Target,?Src,?Len):-
 
 defpost postAdvertise(?DstIP,?Path,?Target,?Src,?Len):- [advertiseRoute(?DstIP,?Path,?Target,?Src,?Len)].
 
-defcon advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):-
-  ?PathToken := label("Path/?Source/?SrcIP/?DstIP/?Len ($Version)"),
+defcon advertiseRouteSD(?FromIP,?DstIP,?Path,?Target,?Src,?Len):-
+  ?PathToken := label("Path/?Src/?FromIP/?DstIP/?Len ($Version)"),
   ?TagSubjectSet := label("tags($Version)"),
   {
     link($PathToken).
     link($TagSubjectSet).
-    advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP/$Len ($Version)").
+    advertise($FromIP,$DstIP,$Path,$Target).
+    label("Advertise/$Target/$FromIP/$DstIP/$Len ($Version)").
   }.
 
-defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):- [advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len)].
+defpost postAdvertiseSD(?FromIP,?DstIP,?Path,?Target,?Src,?Len):- [advertiseRouteSD(?FromIP,?DstIP,?Path,?Target,?Src,?Len)].
 
 //can not use init here
 defcon startRoute(?DstIP,?Path,?Target,?Len):-
@@ -179,21 +165,21 @@ defcon startRoute(?DstIP,?Path,?Target,?Len):-
 
 defpost postInitRoute(?DstIP,?Path,?Target,?Len) :- [startRoute(?DstIP,?Path,?Target,?Len)].
 
-defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
+defcon startRouteSD(?FromIP,?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("sdxTagAclEntry(?SrcIP)(?DstIP)($Version)"),
+  ?AuthzASACL := label("sdxTagAclEntry(?DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).
     link($AuthzASACL).
     link($AuthzASPolicy).
     link($TagPrivPolicy).
-    advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP/$Len ($Version)").
+    advertise($FromIP,$DstIP,$Path,$Target).
+    label("Advertise/$Target/$FromIP/$DstIP/$Len ($Version)").
   }.
 
-defpost postInitRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len) :- [startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len)].
+defpost postInitRouteSD(?FromIP,?DstIP,?Path,?Target,?Len) :- [startRouteSD(?FromIP,?DstIP,?Path,?Target,?Len)].
 
 defcon linkRoute(?Token,?DstIP,?Src,?Len):-
   spec("link a token for an advertised path"),
@@ -211,22 +197,21 @@ defcon addTokenPerIP(?Token,?DstIP):-
 
 defpost postPathToken(?Token,?DstIP,?Src,?Len) :- [linkRoute(?Token,?DstIP,?Src,?Len), addTokenPerIP(?Token,?DstIP)].
 
-//void using Src and SrcIP at the same time, as the interpreter mistake $SrcIP for $Src + "IP"
-defcon linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len):-
+defcon linkRouteSD(?Token,?FromIP,?DstIP,?Src,?Len):-
   spec("link a token for an advertised path"),
   {
     link($Token).
-    label("Path/$Source/$SrcIP/$DstIP/$Len ($Version)").
+    label("Path/$Src/$FromIP/$DstIP/$Len ($Version)").
   }.
 
-defcon addTokenPerIPSD(?Token,?SrcIP,?DstIP):-
+defcon addTokenPerIPSD(?Token,?FromIP,?DstIP):-
   {
     link($Token).
-    label("Token for IP/$SrcIP/$DstIP ($Version)").
+    label("Token for IP/$FromIP/$DstIP ($Version)").
   }.
 
 
-defpost postPathTokenSD(?Token,?SrcIP,?DstIP,?Source,?Len) :- [linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len), addTokenPerIPSD(?Token,?SrcIP,?DstIP)].
+defpost postPathTokenSD(?Token,?FromIP,?DstIP,?Src,?Len) :- [linkRouteSD(?Token,?FromIP,?DstIP,?Src,?Len), addTokenPerIPSD(?Token,?FromIP,?DstIP)].
 
 defguard verifyRoute(?Owner,?DstIP,?Path,?Token) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
@@ -238,27 +223,27 @@ defguard verifyRoute(?Owner,?DstIP,?Path,?Token) :-
     route($Owner, $DstIP,$Path)?
   }.
 
-defguard verifyRouteSD(?Owner,?SrcIP,?DstIP,?Path,?Token) :-
+defguard verifyRouteSD(?Owner,?FromIP,?DstIP,?Path,?Token) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
   ?OwnPrefixPolicy := label("own prefix policy($PolicyVersion)"),
   {
     link($OwnPrefixPolicy).
     link($RoutingPolicyRef).
     link($Token).
-    route($Owner,$SrcIP,$DstIP,$Path)?
+    route($Owner,$FromIP,$DstIP,$Path)?
   }.
 
-defguard verifyCompliantPath(?Owner,?SrcIP,?DstIP,?Path,?PolicyToken, ?RouteToken) :-
+defguard verifyCompliantPath(?Owner,?FromIP,?DstIP,?Path,?Token1,?Token2) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
   ?OwnPrefixPolicy := label("own prefix policy($PolicyVersion)"),
   ?SelfTagSet := label("tags($Version)"),
   {
     link($OwnPrefixPolicy).
     link($RoutingPolicyRef).
-    link($PolicyToken).
-    link($RouteToken).
+    link($Token1).
+    link($Token2).
     link($SelfTagSet).
-    compliantPath($Owner,$SrcIP,$DstIP,$Path)?
+    compliantPath($Owner,$FromIP,$DstIP,$Path)?
   }.
 
 defguard verifyAS(?Owner, ?DstIP, ?AS, ?Token):-
@@ -271,13 +256,13 @@ defguard verifyAS(?Owner, ?DstIP, ?AS, ?Token):-
     verifyAS($Owner, $DstIP, $AS)?
   }.
 
-defguard verifyASSD(?Owner, ?SrcIP, ?DstIP, ?AS, ?Token):-
+defguard verifyASSD(?Owner, ?FromIP, ?DstIP, ?AS, ?Token):-
   ?VerifyASPolicyRef := label("verify as policy($PolicyVersion)"),
   ?ASTagSet := label(?AS, "tags($Version)"),
   {
     link($Token).
     link($VerifyASPolicyRef).
     link($ASTagSet).
-    verifyAS($Owner, $SrcIP, $DstIP, $AS)?
+    verifyAS($Owner, $FromIP, $DstIP, $AS)?
   }.
 

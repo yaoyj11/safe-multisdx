@@ -4,7 +4,7 @@ import("../geni_fine.slang").
 //Users
 //We may just link the tag set in user" subject set
 //
-defenv RpkiRoot() :- "FcHzu-wG1BEHYBljyKf-4l9H3mFqsD2IOObzrhq2KcE=".
+defenv RpkiRoot() :- "FcHzu-wG1BEHYBljyKf-4l9H3mFqsD2IOObzrhq2KcE".
 
 defcon makeTagSet(?Tag) :-
   spec("Construct the identity set for a tag"),
@@ -20,7 +20,7 @@ defcon makeTagSubjectSet() :-
     label("tags($Version)").
   }.
 
-defpost initTagSubjectSet() :- [makeTagSubjectSet()].
+defpost postMakeTagSubjectSet() :- [makeTagSubjectSet()].
 
 defcon addTokenToTagSet(?Token, ?Tag) :-
   spec("Add a link to a tag's ID set. Invoked after delegation to this tag"),
@@ -36,7 +36,7 @@ defcon addTokenToTagSubjectSet(?Token) :-
     label("tags($Version)").
   }.
 
-defpost updateTagSet(?Token, ?Tag) :- [addTokenToTagSet(?Token, ?Tag), addTokenToTagSubjectSet(?Token), addTokenToSubjectSet(?Token)].
+defpost updateTagSet(?Token, ?Tag) :- [addTokenToTagSet(?Token, ?Tag), addTokenToTagSubjectSet(?Token)].
 
 //
 //PA
@@ -206,7 +206,7 @@ defcon addDlgToken(?Token,?Prefix):-
     label("Token for IP allocation/$Prefix($Version)").
   }.
 
-defpost postDlgToken(?Token,?Prefix) :- [addDlgToken(?Token,?Prefix), addTokenToSubjectSet(?Token)].
+defpost postDlgToken(?Token,?Prefix) :- [addDlgToken(?Token,?Prefix)].
 
 //
 //SDX
@@ -290,22 +290,9 @@ defcon stitchPolicy() :-
       ?SA: slice(?Slice,?Proj, standard),
       projectTagAclEntry(?Tag),
       tagAccess(?Tag,?Proj).
-    
-    approveChameleonStitchByUID(?User, ?Stitchport, ?Vlan):-
-      userAclEntry(?User),
-      ?User: stitchChameleon(?Stitchport, ?Vlan).
 
     label("slice stitching policy($PolicyVersion)").
   }.
-
-defcon chameleonStitchRequest(?Stitchport,?Vlan):-
-  spec('customer post a chameleon sttich request'),
-  {
-    stitchChameleon($Stitchport,$Vlan).
-    label("stitch request($Version)").
-  }.
-
-defpost postChameleonStitchRequest(?Stitchport,?Vlan):-[chameleonStitchRequest(?Stitchport,?Vlan)].
 
 definit stitchPolicy().
 
@@ -387,188 +374,178 @@ defcon customerPolicy() :-
 
 defpost postCustomerPolicy() :-[customerPolicy()].
 
-defguard whoami() :-
-  spec("Query principal id"),
-  {
-    principalId($Self).
-    principalId(?X)?
-  }.
+//
+//This is different from that in geni.slang, since here we use the sets to store attributes assigned to the slice and projec, 
+//The owner of the sets are the project authority and slice owner.
+//TODO: link project tag set here?
+
 
 //NOTE: use double quotes for label
-defguard authorizeStitchByUID(?User, ?Slice):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("userAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
+defguard authorizeStitchByUID(?User, ?Slice, ?Token1, ?Token2):-
+  spec("authorize stitching request based on user attribute or slice attribute"),
+  //?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
+  //?AclSet := label("userAclEntry($Version)"),
+  //?UserCapabilitySet := label(?User, "capability(?Slice)($Version)"),
+  //?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
   {
-    link($StitchPolicyRef).
-    //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
+    //link($StitchPolicyRef).
+    link($BearerRef).
+    //link($UserCapabilitySet).
+    //link($AclSet).
+    //link($TagAccessPolicySet).
+    link($Token1).
+    link($Token2).
     approveStitchByUID($User, $Slice)?
   }.
 
-//NOTE: use double quotes for label
-defguard authorizeChameleonStitchByUID(?User, ?StitchPort,?Vlan):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("userAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
-  ?RequestToken := label(?User,"stitch request($Version)"),
+defguard authorizeStitchByUserAttr(?User, ?Slice,?Tag, ?Token1, ?Token2, ?Token3):-
+  spec("authorize stitching request based on user attribute or slice attribute"),
+  //?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
+  //?AclSet := label("userTagAclEntry($Version)"),
+  ?UserTagSet := label(?User, "tags($Version)"),
+  ?UserCapabilitySet := label(?User, "capability(?Slice)($Version)"),
+  //?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
   {
-    link($StitchPolicyRef).
+    //link($StitchPolicyRef).
     //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
-    link($RequestToken).
-    approveChameleonStitchByUID($User, $StitchPort, $Vlan)?
+    link($UserTagSet).
+    //link($AclSet).
+    link($UserCapabilitySet).
+    link($Token1).
+    link($Token2).
+    link($Token3).
+    //link($TagAccessPolicySet).
+    approveStitchByUserAttr($User, $Slice, $Tag)?
   }.
 
-defguard authorizeStitchByUserAttr(?User, ?Slice):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("userTagAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
+defguard authorizeStitchBySliceAttr(?User, ?Slice, ?Tag, ?Token1, ?Token2, ?Token3):-
+  spec("authorize stitching request based on user attribute or slice attribute"),
+  //?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
+  //?AclSet := label("sliceTagAclEntry($Version)"),
+  //?UserCapabilitySet := label(?User, "capability(?Slice)($Version)"),
+  //?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
   {
-    link($StitchPolicyRef).
-    //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
-    approveStitchByUserAttr($User, $Slice)?
+    //link($StitchPolicyRef).
+    link($BearerRef).
+    //link($UserCapabilitySet).
+    //link($AclSet).
+    //link($TagAccessPolicySet).
+    link($Token1).
+    link($Token2).
+    link($Token3).
+    approveStitchBySliceAttr($User, $Slice, $Tag)?
   }.
 
-defguard authorizeStitchBySliceAttr(?User, ?Slice):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("sliceTagAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
+defguard authorizeStitchByPID(?User, ?Slice, ?Token1, ?Token2, ?Token3):-
+  spec("authorize stitching request based on user attribute or slice attribute"),
+  //?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
+  //?AclSet := label("projectIDAclEntry($Version)"),
+  //?UserCapabilitySet := label(?User, "capability(?Slice)($Version)"),
+  //?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
   {
-    link($StitchPolicyRef).
-    //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
-    approveStitchBySliceAttr($User, $Slice)?
+    //link($StitchPolicyRef).
+    link($BearerRef).
+    //link($UserCapabilitySet).
+    //link($AclSet).
+    //link($TagAccessPolicySet).
+    link($Token1).
+    link($Token2).
+    link($Token3).
+    approveStitchByPID($User, $Slice)?
   }.
 
-defguard authorizeStitchByPA(?User, ?Slice):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("projectAuthorityAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
+defguard authorizeStitchByProjectAttr(?User, ?Slice,?Tag, ?Token1, ?Token2, ?Token3):-
+  spec("authorize stitching request based on user attribute or slice attribute"),
+  //?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
+  //?AclSet := label("projectTagAclEntry($Version)"),
+  ?UserCapabilitySet := label(?User, "capability(?Slice)($Version)"),
+  //?UserSubjectSet := label(?User, "subject(?User)($Version)"),
+  //?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
   {
-    link($StitchPolicyRef).
-    //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
-    approveStitchByPA($User, $Slice)?
-  }.
-
-defguard authorizeStitchByProjectAttr(?User, ?Slice):-
-  spec('authorize stitching request based on user attribute or slice attribute'),
-  ?StitchPolicyRef := label("slice stitching policy($PolicyVersion)"),
-  ?AclSet := label("projectTagAclEntry($Version)"),
-  ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
-  ?TagAccessPolicySet := label("tag-access-policy($PolicyVersion)"),
-  {
-    link($StitchPolicyRef).
-    //link($BearerRef).
-    link($UserSubjectSet).
-    link($AclSet).
-    link($TagAccessPolicySet).
-    approveStitchByProjectAttr($User, $Slice)?
+    //link($StitchPolicyRef).
+    link($BearerRef).
+    link($Token1).
+    link($Token2).
+    link($Token3).
+    link($UserCapabilitySet).
+    //link($UserSubjectSet).
+    //link($AclSet).
+    //link($TagAccessPolicySet).
+    approveStitchByProjectAttr($User, $Slice, $Tag)?
   }.
 
 
-defguard authZByPI(?Alice, ?IPa, ?Bob, ?IPb) :-
-  spec('authorize network connection between customer Alice and Bob'),
-  ?AliceConPolicyRef := label(?Alice, "customer-connection-policy($PolicyVersion)"),
-  ?AliceTagPolicyRef := label(?Alice, "tag-access-policy($PolicyVersion)"),
-  ?AliceAclRef := label(?Alice, "projectAuthorityAclEntry($Version)"),
-  ?AliceSubjectSet := label(?Alice, "subject(?Alice)($Version)"),
-  ?BobConPolicyRef := label(?Bob, "customer-connection-policy($PolicyVersion)"),
-  ?BobTagPolicyRef := label(?Bob, "tag-access-policy($PolicyVersion)"),
-  ?BobAclRef := label(?Bob, "projectAuthorityAclEntry($Version)"),
-  ?BobSubjectSet := label(?Bob, "subject(?Bob)($Version)"),
-  ?ConnectPolicy := label("sdx-connectivity-policy($PolicyVersion)"),
-  ?OwnPrefixPolicySet := label("own prefix policy($PolicyVersion)"),
+defguard authZByPID(?Alice, ?IPa, ?Bob, ?IPb, ?Token1, ?Token2, ?Token3, ?Token4, ?IPTokena, ?IPTokenb, ?AuthZPolicy) :-
+  spec("authorize network connection between customer Alice and Bob"),
+  //?AlicePolicyRef := label(?Alice, "customer-policy($PolicyVersion)"),
+  //?AliceAclRef := label(?Alice, "projectIDAclEntry($Version)"),
+  //?BobPolicyRef := label(?Bob, "customer-policy($PolicyVersion)"),
+  //?BobAclRef := label(?Bob, "projectIDAclEntry($Version)"),
+  //?AuthZPolicy := label("authZPolicy($PolicyVersion)"),
   {
-     link($AliceConPolicyRef).
-     link($AliceTagPolicyRef).
-     link($AliceAclRef).
-     link($AliceSubjectSet).
-     link($BobConPolicyRef).
-     link($BobTagPolicyRef).
-     link($BobAclRef).
-     link($BobSubjectSet).
-     link($ConnectPolicy).
-     link($OwnPrefixPolicySet).
-     authZByPI($Alice, $Bob, $IPa, $IPb)?
+     //link($AlicePolicyRef).
+     //link($AliceAclRef).
+     //link($BobPolicyRef).
+     //link($BobAclRef).
+     link($Token1).
+     link($Token2).
+     link($Token3).
+     link($Token4).
+     link($IPTokena).
+     link($IPTokenb).
+     link($AuthZPolicy).
+     authZByPID($Alice, $Bob, $IPa, $IPb)?
   }.
 
-defguard authZByProjectAttr(?Alice, ?IPa, ?Bob, ?IPb) :-
-  spec('authorize network connection between customer Alice and Bob'),
-  ?AliceConPolicyRef := label(?Alice, "customer-connection-policy($PolicyVersion)"),
-  ?AliceTagPolicyRef := label(?Alice, "tag-access-policy($PolicyVersion)"),
-  ?AliceAclRef := label(?Alice, "projectTagAclEntry($Version)"),
-  ?AliceSubjectSet := label(?Alice, "subject(?Alice)($Version)"),
-  ?BobConPolicyRef := label(?Bob, "customer-connection-policy($PolicyVersion)"),
-  ?BobTagPolicyRef := label(?Bob, "tag-access-policy($PolicyVersion)"),
-  ?BobAclRef := label(?Bob, "projectTagAclEntry($Version)"),
-  ?BobSubjectSet := label(?Bob, "subject(?Bob)($Version)"),
-  ?ConnectPolicy := label("sdx-connectivity-policy($PolicyVersion)"),
-  ?OwnPrefixPolicySet := label("own prefix policy($PolicyVersion)"),
+defguard authZByProjectAttr(?Alice, ?IPa, ?Bob, ?IPb, ?Token1,?Token2, ?Token3, ?Token4, ?IPTokena, ?IPTokenb, ?AuthZPolicy) :-
+  spec("authorize network connection between customer Alice and Bob"),
+  //?AlicePolicyRef := label(?Alice, "customer-policy($PolicyVersion)"),
+  //?AliceAclRef := label(?Alice, "projectTagAclEntry($Version)"),
+  //?BobPolicyRef := label(?Bob, "customer-policy($PolicyVersion)"),
+  //?BobAclRef := label(?Bob, "projectTagAclEntry($Version)"),
   {
-     link($AliceConPolicyRef).
-     link($AliceTagPolicyRef).
-     link($AliceAclRef).
-     link($AliceSubjectSet).
-     link($BobConPolicyRef).
-     link($BobTagPolicyRef).
-     link($BobAclRef).
-     link($BobSubjectSet).
-     link($ConnectPolicy).
-     link($OwnPrefixPolicySet).
+     //link($AlicePolicyRef).
+     //link($AliceAclRef).
+     //link($BobPolicyRef).
+     //link($BobAclRef).
+     link($Token1).
+     link($Token2).
+     link($Token3).
+     link($Token4).
+     link($IPTokena).
+     link($IPTokenb).
+     link($AuthZPolicy).
      authZByProjectAttr($Alice, $Bob, $IPa, $IPb)?
   }.
 
-defguard authZByUserAttr(?Alice, ?IPa, ?Bob, ?IPb) :-
-  spec('authorize network connection between customer Alice and Bob'),
-  ?AliceConPolicyRef := label(?Alice, "customer-connection-policy($PolicyVersion)"),
-  ?AliceTagPolicyRef := label(?Alice, "tag-access-policy($PolicyVersion)"),
-  ?AliceAclRef := label(?Alice, "userTagAclEntry($Version)"),
-  ?AliceSubjectSet := label(?Alice, "subject(?Alice)($Version)"),
-  ?BobConPolicyRef := label(?Bob, "customer-connection-policy($PolicyVersion)"),
-  ?BobTagPolicyRef := label(?Bob, "tag-access-policy($PolicyVersion)"),
-  ?BobAclRef := label(?Bob, "userTagAclEntry($Version)"),
-  ?BobSubjectSet := label(?Bob, "subject(?Bob)($Version)"),
-  ?ConnectPolicy := label("sdx-connectivity-policy($PolicyVersion)"),
-  ?OwnPrefixPolicySet := label("own prefix policy($PolicyVersion)"),
+//TODO: use bearRef to reduce the lines of scripts
+defguard authZByUserAttr(?Alice, ?IPa, ?Bob, ?IPb, ?Token1, ?Token2, ?Token3, ?Token4,?IPTokena, ?IPTokenb,?TagSubA, ?TagSubB, ?AuthZPolicy) :-
+  spec("authorize network connection between customer Alice and Bob"),
+  //?AlicePolicyRef := label(?Alice, "customer-policy($PolicyVersion)"),
+  //?AliceAclRef := label(?Alice, "userTagAclEntry($Version)"),
+  //?BobPolicyRef := label(?Bob, "customer-policy($PolicyVersion)"),
+  //?BobAclRef := label(?Bob, "userTagAclEntry($Version)"),
+  //?ConnectPolicy := label("sdx-connectivity-policy($PolicyVersion)"),
+  //?OwnPrefixPolicySet := label("own prefix policy($PolicyVersion)"),
   {
-     link($AliceConPolicyRef).
-     link($AliceTagPolicyRef).
-     link($AliceAclRef).
-     link($AliceSubjectSet).
-     link($BobConPolicyRef).
-     link($BobTagPolicyRef).
-     link($BobAclRef).
-     link($BobSubjectSet).
-     link($ConnectPolicy).
-     link($OwnPrefixPolicySet).
+     //link($AlicePolicyRef).
+     //link($AliceAclRef).
+     //link($BobPolicyRef).
+     //link($BobAclRef).
+     link($Token1).
+     link($Token2).
+     link($Token3).
+     link($Token4).
+     link($IPTokena).
+     link($IPTokenb).
+     link($TagSubA).
+     link($TagSubB).
+     link($AuthZPolicy).
      authZByUserAttr($Alice, $Bob, $IPa, $IPb)?
   }.
 
 defguard authorizeOwnPrefix(?User,?Prefix) :-
-  spec('authorize if user owns prefix'),
+  spec("authorize if user owns prefix"),
   ?UserSubjectSet := label(?User, "subject(?User)($Version)"),
   ?OwnPrefixPolicy := label("own prefix policy($PolicyVersion)"),
   {
