@@ -90,23 +90,25 @@ defcon routingPolicy() :-
       authorizedAdvertise(?Owner,?DstIPRange,?Tail,?Head),
       ?DstIP <: ?DstIPRange.
 
-    route(?Owner,?FromIP,?DstIP,?Path) :-
-      authorizedAdvertise(?Owner,?FromIPRange,?DstIPRange,?Path,$Self),
-      ?FromIP <: ?FromIPRange,
+    routeSD(?SOwner,?DOwner,?SrcIP,?DstIP,?Path) :-
+      ownPrefix(?SOwner,?SrcIP),
+      authorizedAdvertiseSD(?SOwner,?DOwner,?SrcIPRange,?DstIPRange,?Path,$Self),
+      ?SrcIP <: ?SrcIPRange,
       ?DstIP <: ?DstIPRange.
 
-    authorizedAdvertise(?Owner,?FromIP,?DstIP,?Path,?AS):-
-      eq([?Owner|?Tail],?Path),
+    authorizedAdvertiseSD(?SOwner,?DOwner,?SrcIP,?DstIP,?Path,?AS):-
+      eq([?DOwner|?Tail],?Path),
       eq(?Tail,[]),
-      ?Owner: advertise(?FromIP,?DstIP,?Path,?AS),
-      ownPrefix(?Owner,?DstIP).
+      ?DOwner: advertise(?SrcIP,?DstIP,?Path,?AS),
+      ownPrefix(?DOwner,?DstIP).
 
-    authorizedAdvertise(?Owner,?FromIP,?DstIP,?Path,?AS):-
+    authorizedAdvertiseSD(?SOwner,?DOwner,?SrcIP,?DstIP,?Path,?AS):-
       eq([?Head|?Tail],?Path),
-      ?Head:advertise(?FromIP,?DstIP,?Path,?AS),
-      ?Owner: authorizedAS(?Head,?FromIP,?DstIP),
-      authorizedAdvertise(?Owner,?FromIPRange,?DstIPRange,?Tail,?Head),
-      ?FromIP <: ?FromIPRange,
+      ?Head:advertise(?SrcIP,?DstIP,?Path,?AS),
+      ?DOwner: authorizedAS(?Head,?SrcIP,?DstIP),
+      ?SOwner: authorizedAS(?Head,?SrcIP,?DstIP),
+      authorizedAdvertiseSD(?SOwner,?DOwner,?SrcIPRange,?DstIPRange,?Tail,?Head),
+      ?SrcIP <: ?SrcIPRange,
       ?DstIP <: ?DstIPRange.
 
     compliantPath(?Owner,?FromIP,?DstIP,?Path) :-
@@ -223,14 +225,15 @@ defguard verifyRoute(?Owner,?DstIP,?Path,?Token) :-
     route($Owner, $DstIP,$Path)?
   }.
 
-defguard verifyRouteSD(?Owner,?FromIP,?DstIP,?Path,?Token) :-
+defguard verifyRouteSD(?SOwner,?DOwner,?FromIP,?DstIP,?Path,?SToken,?DToken) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
   ?OwnPrefixPolicy := label("own prefix policy($PolicyVersion)"),
   {
     link($OwnPrefixPolicy).
     link($RoutingPolicyRef).
-    link($Token).
-    route($Owner,$FromIP,$DstIP,$Path)?
+    link($SToken).
+    link($DToken).
+    routeSD($SOwner,$DOwner,$FromIP,$DstIP,$Path)?
   }.
 
 defguard verifyCompliantPath(?Owner,?FromIP,?DstIP,?Path,?Token1,?Token2) :-
