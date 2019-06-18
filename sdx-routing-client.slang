@@ -55,12 +55,16 @@ defcall postPathTokenSD(?ServerJVM,?ServerPrincipal,?Envs,?Token,?FromIP,?DstIP,
     postPathTokenSD($ServerJVM,$ServerPrincipal,$Envs,$Token,$FromIP,$DstIP,$Src,$Len).
   }.
 
-defcall postASTagAclEntrySDSet(?SpeakerJVM,?Speaker,?SpeakerEnvs,?Tag,?Prefix, ?PrefixPeer):-
+defcall postASTagAclEntrySDSet(?SpeakerJVM,?Speaker,?SpeakerEnvs,?Tag,?Prefix,?PrefixPeer):-
   {
 //     postASTagAclEntrySD($SpeakerJVM,$Speaker,$SpeakerEnvs,$Tag,$PrefixPeer, $Prefix).
      postASTagAclEntrySD($SpeakerJVM,$Speaker,$SpeakerEnvs,$Tag,$Prefix,$PrefixPeer).
 //     postSdPolicySet($SpeakerJVM,$Speaker,$SpeakerEnvs,$Prefix,$PrefixPeer).
   }.
+
+postASTagAclEntrySDPair(?SpeakerJVM,?Speaker,?TargetJVM,?Target,?SpeakerEnvs,?UpdateEnvs,?Tag,?Prefix,?PeerPrefix):-
+  postASTagAclEntrySDSet(?SpeakerJVM,?Speaker,?SpeakerEnvs,?Tag,?Prefix,?PeerPrefix),
+  postASTagAclEntrySDSet(?TargetJVM,?Target,?UpdateEnvs,?Tag,?PeerPrefix,?Prefix).
 
 advertisePath(?SpeakerJVM,?Speaker,?TargetJVM,?Target,?AdvertiseEnvs,?UpdateEnvs,?DstIP,?Path,?Src,?Len,?Len1):-
   ?Token := postAdvertise(?SpeakerJVM,?Speaker,?AdvertiseEnvs,?DstIP,?Path,?Target,?Src,?Len),
