@@ -85,7 +85,7 @@ defcall verifyRoute(?ServerJVM,?ServerPrincipal,?Envs,?DstIP,?Path,?Src,?Len):-
 
 defcall verifyRouteSD(?ServerJVM,?ServerPrincipal,?Envs,?SOwner,?DOwner,?FromIP,?DstIP,?Path,?SToken,?DToken):-
   {
-    verifyRouteSD($ServerJVM,$ServerPrincipal,$Envs,?SOwner,?DOwner,$FromIP,$DstIP,$Path,$SToken,$DToken).
+    verifyRouteSD($ServerJVM,$ServerPrincipal,$Envs,$SOwner,$DOwner,$FromIP,$DstIP,$Path,$SToken,$DToken).
   }.
 
 defcall verifyCompliantPath(?ServerJVM,?ServerPrincipal,?Envs,?Owner,?FromIP,?DstIP,?Path,?Token1,?Token2):-
