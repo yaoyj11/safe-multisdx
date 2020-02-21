@@ -82,9 +82,9 @@ initPathSD(?SpeakerJVM,?Speaker,?TargetJVM,?Target,?AdvertiseEnvs,?UpdateEnvs,?F
   ?Token := postInitRouteSD(?SpeakerJVM,?Speaker,?AdvertiseEnvs,?FromIP,?DstIP,?Path,?Target,?Len),
   postPathTokenSD(?TargetJVM,?Target,?UpdateEnvs,?Token,?FromIP,?DstIP,?Speaker,?Len1).
 
-defcall verifyRoute(?ServerJVM,?ServerPrincipal,?Envs,?DstIP,?Path,?Src,?Len):-
+defcall verifyRoute(?ServerJVM,?ServerPrincipal,?Envs,?Owner,?DstIP,?Path,?Token):-
   {
-    verifyRoute($ServerJVM,$ServerPrincipal,$Envs,$DstIP,$Path,$Src,$Len).
+    verifyRoute($ServerJVM,$ServerPrincipal,$Envs,$Owner,$DstIP,$Path,$Token).
   }.
 
 defcall verifyRouteSD(?ServerJVM,?ServerPrincipal,?Envs,?SOwner,?DOwner,?FromIP,?DstIP,?Path,?SToken,?DToken):-
