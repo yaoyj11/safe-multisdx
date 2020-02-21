@@ -77,45 +77,42 @@ defpost postVerifyASPolicy() :- [verifyASPolicy()].
 defcon routingPolicy() :-
   {
     route(?Owner,?DstIP,?Path) :-
-      authorizedAdvertise(?Owner,?DstIPRange,?Path,$Self),
-      ?DstIP <: ?DstIPRange.
+      authorizedAdvertise(?Owner,?DstIP,?Path,$Self).
 
     authorizedAdvertise(?Owner,?DstIP,?Path,?AS):-
       eq([?Owner|?Tail],?Path),
       eq(?Tail,[]),
       ?Owner: advertise(?DstIP,?Path,?AS),
-      ownPrefix(?Owner,?DstIP).
+      ownPrefix(?Owner,?SupDstIP),
+      ?DstIP <: ?SupDstIP.
 
     authorizedAdvertise(?Owner,?DstIP,?Path,?AS):-
       eq([?Head|?Tail],?Path),
       ?Head:advertise(?DstIP,?Path,?AS),
       ?Owner: authorizedAS(?Head, ?DstIP),
-      authorizedAdvertise(?Owner,?DstIPRange,?Tail,?Head),
-      ?DstIP <: ?DstIPRange.
+      authorizedAdvertise(?Owner,?DstIP,?Tail,?Head).
 
     route(?Owner,?SrcIP,?DstIP,?Path) :-
-      authorizedAdvertise(?Owner,?SrcIPRange,?DstIPRange,?Path,$Self),
-      ?SrcIP <: ?SrcIPRange,
-      ?DstIP <: ?DstIPRange.
+      authorizedAdvertise(?Owner,?SrcIP,?DstIPRange,?Path,$Self).
 
     authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,?AS):-
       eq([?Owner|?Tail],?Path),
       eq(?Tail,[]),
       ?Owner: advertise(?SrcIP,?DstIP,?Path,?AS),
-      ownPrefix(?Owner,?DstIP).
+      ownPrefix(?Owner,?SupDstIP),
+      ?DstIP <: ?SupDstIP.
 
     authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,?AS):-
       eq([?Head|?Tail],?Path),
       ?Head:advertise(?SrcIP,?DstIP,?Path,?AS),
       ?Owner: authorizedAS(?Head,?SrcIP,?DstIP),
-      authorizedAdvertise(?Owner,?SrcIPRange,?DstIPRange,?Tail,?Head),
-      ?SrcIP <: ?SrcIPRange,
-      ?DstIP <: ?DstIPRange.
+      authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Tail,?Head).
 
     compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
       eq([?Owner|?Tail],?Path),
       eq(?Tail,[]),
-      ownPrefix(?Owner, ?DstIP).
+      ownPrefix(?Owner, ?SupDstIP),
+      ?DstIP <: ?SupDstIP.
 
     compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
       eq([?Owner|?Tail],?Path),
@@ -130,7 +127,6 @@ defcon routingPolicy() :-
       eq([?Head|?Tail],?Path),
       ?Owner: authorizedAS(?Head, ?SrcIP, ?DstIP),
       compliantPath(?Owner, ?SrcIP, ?DstIP, ?Tail).
- 20     postInitRoute($ServerJVM,$ServerPrincipal,$Envs,$DstIP,$Path,$Target,$Len).           
 
     label("routing policy($PolicyVersion)").
   }.
@@ -138,8 +134,8 @@ defcon routingPolicy() :-
 defpost postRoutingPolicy() :- [routingPolicy()].
 definit routingPolicy().
 
-defcon advertiseRoute(?DstIP,?Path,?Target,?Src,?Len):-
-  ?PathToken := label("Path/?Src/?DstIP/?Len ($Version)"),
+defcon advertiseRoute(?DstIP,?Path,?Target,?Source,?Len):-
+  ?PathToken := label("Path/?Source/?DstIP/?Len ($Version)"),
   ?TagSubjectSet := label("tags($Version)"),
   {
     link($PathToken).
@@ -148,7 +144,7 @@ defcon advertiseRoute(?DstIP,?Path,?Target,?Src,?Len):-
     label("Advertise/$Target/$DstIP/$Len ($Version)").
   }.
 
-defpost postAdvertise(?DstIP,?Path,?Target,?Src,?Len):- [advertiseRoute(?DstIP,?Path,?Target,?Src,?Len)].
+defpost postAdvertise(?DstIP,?Path,?Target,?Source,?Len):- [advertiseRoute(?DstIP,?Path,?Target,?Source,?Len)].
 
 defcon advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):-
   ?PathToken := label("Path/?Source/?SrcIP/?DstIP/?Len ($Version)"),

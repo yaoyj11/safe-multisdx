@@ -182,15 +182,15 @@ definit ownPrefixPolicy().
 
 defpost postOwnPrefixPolicy() :- [ownPrefixPolicy()].
 
-defcon ipAllocate(?Prcpl,?Prefix,?DlgPrefix) :-
-  ?IPSetToken := label("Token for IP allocation/?DlgPrefix($Version)"),
+defcon ipAllocate(?Prcpl,?Prefix,?SupPrefix) :-
+  ?IPSetToken := label("Token for IP allocation/?SupPrefix($Version)"),
   {
     link($IPSetToken).
     allocate($Prcpl,$Prefix).
     label("IP allocation/$Prcpl($Version)").
   }.
 
-defpost postIPAllocate(?Prcpl,?Prefix,?DlgPrefix) :-[ipAllocate(?Prcpl,?Prefix,?DlgPrefix)].
+defpost postIPAllocate(?Prcpl,?Prefix,?SupPrefix) :-[ipAllocate(?Prcpl,?Prefix,?SupPrefix)].
 
 defcon makeIPTokenSet(?DlgPrefix) :-
   {
