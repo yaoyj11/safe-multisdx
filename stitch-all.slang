@@ -4,7 +4,7 @@ import("../geni_fine.slang").
 //Users
 //We may just link the tag set in user" subject set
 //
-defenv RpkiRoot() :- "FcHzu-wG1BEHYBljyKf-4l9H3mFqsD2IOObzrhq2KcE=".
+defenv RpkiRoot() :- "FcHzu-wG1BEHYBljyKf-4l9H3mFqsD2IOObzrhq2KcE".
 
 defcon makeTagSet(?Tag) :-
   spec("Construct the identity set for a tag"),
