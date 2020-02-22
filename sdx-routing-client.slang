@@ -35,9 +35,9 @@ defcall postASTagAclEntry(?ServerJVM,?ServerPrincipal,?Envs,?Tag,?Prefix) :-
     postASTagAclEntry($ServerJVM,$ServerPrincipal,$Envs,$Tag,$Prefix).
   }.
 
-defcall postASTagAclEntrySD(?ServerJVM,?ServerPrincipal,?Envs,?Tag,?Prefix,?PeerPrefix) :- 
+defcall postASTagAclEntrySD(?ServerJVM,?ServerPrincipal,?Envs,?Tag,?SrcPrefix,?DstPrefix) :-
   {
-    postASTagAclEntrySD($ServerJVM,$ServerPrincipal,$Envs,$Tag,$Prefix,$PeerPrefix).
+    postASTagAclEntrySD($ServerJVM,$ServerPrincipal,$Envs,$Tag,$SrcPrefix,$DstPrefix).
   }.
 
 defcall postSdPolicySet(?ServerJVM,?ServerPrincipal,?Envs,?Prefix,?PeerPrefix) :- 

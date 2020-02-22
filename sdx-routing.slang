@@ -1,24 +1,24 @@
 import("../stitch-all.slang").
 //cannot use as tag here
 
-defcon sdxTagAclEntry(?Tag,?Prefix) :-
+defcon routeTagAclEntry(?Tag,?Prefix) :-
   spec("user as tag access control list"),
   {
-    sdxTagAclEntry($Tag,$Prefix).
-    label("sdxTagAclEntry($Prefix)($Version)").
+    routeTagAclEntry($Tag,$Prefix).
+    label("routeTagAclEntry($Prefix)($Version)").
   }.
 
-defpost postASTagAclEntry(?Tag,?Prefix) :- [sdxTagAclEntry(?Tag,?Prefix)].
+defpost postASTagAclEntry(?Tag,?Prefix) :- [routeTagAclEntry(?Tag,?Prefix)].
 
-defcon sdxTagAclEntrySD(?Tag, ?SrcPrefix, ?DstPrefix) :-
+defcon routeTagAclEntrySD(?Tag, ?SrcIP, ?DstIP) :-
   spec("user as tag access control list"),
   {
-    sdxTagAclEntry($Tag, $SrcPrefix, $DstPrefix).
-    label("sdxTagAclEntry($SrcPrefix)($DstPrefix)($Version)").
+    routeTagAclEntry($Tag, $SrcIP, $DstIP).
+    label("RouteTagAclEntry($SrcIP)($DstIP)($Version)").
   }.
 
 defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
-  ?TagAclToken := label("sdxTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
+  ?TagAclToken := label("RouteTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
   ?IPToken := label("Token for IP allocation/?SrcPrefix($Version)"),
   ?AuthASPolicy := label("authz as policy($PolicyVersion)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
@@ -30,7 +30,7 @@ defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
     label("SD Policy Set/$SrcPrefix/$DstPrefix($Version)").
   }.
 
-defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [sdxTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
+defpost postASTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix) :- [routeTagAclEntrySD(?Tag,?SrcPrefix,?DstPrefix)].
 
 defpost postSdPolicySet(?SrcPrefix,?DstPrefix) :- [sdPolicySet(?SrcPrefix,?DstPrefix)].
 
@@ -41,7 +41,7 @@ defcon authorizeASPolicy():-
       authorizedASByUserAttr(?AS, ?DstIP).
 
     authorizedASByUserAttr(?AS, ?Prefix):-
-      sdxTagAclEntry(?Tag, ?PrefixSet),
+      routeTagAclEntry(?Tag, ?PrefixSet),
       ?Prefix <: ?PrefixSet,
       tagPrivilege(?Tag, ?AS).
 
@@ -49,7 +49,7 @@ defcon authorizeASPolicy():-
       authorizedASByUserAttr(?AS, ?SrcIP, ?DstIP).
 
     authorizedASByUserAttr(?AS, ?SrcIP, ?DstIP):-
-      sdxTagAclEntry(?Tag, ?SrcPrefix, ?DstPrefix),
+      routeTagAclEntry(?Tag, ?SrcPrefix, ?DstPrefix),
       ?SrcIP <: ?SrcPrefix,
       ?DstIP <: ?DstPrefix,
       tagPrivilege(?Tag, ?AS).
@@ -162,7 +162,7 @@ defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):- [advertiseRo
 defcon startRoute(?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("sdxTagAclEntry(?DstIP)($Version)"),
+  ?AuthzASACL := label("RouteTagAclEntry(?DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).
@@ -178,7 +178,7 @@ defpost postInitRoute(?DstIP,?Path,?Target,?Len) :- [startRoute(?DstIP,?Path,?Ta
 defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("sdxTagAclEntry(?SrcIP)(?DstIP)($Version)"),
+  ?AuthzASACL := label("RouteTagAclEntry($SrcIP)($DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).

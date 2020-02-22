@@ -40,7 +40,7 @@ defcall postTagSet(?ServerJVM,?ServerPrincipal,?Envs,?Tag):-
     postTagSet($ServerJVM,$ServerPrincipal,$Envs,$Tag).
   }.
 
-defcall makeTagSubjectSet(?ServerJVM,?ServerPrincipal,?Envs):-
+defcall postMakeTagSubjectSet(?ServerJVM,?ServerPrincipal,?Envs):-
   {
     postMakeTagSubjectSet($ServerJVM,$ServerPrincipal,$Envs).
   }.
