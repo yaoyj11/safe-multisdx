@@ -93,7 +93,7 @@ defcon routingPolicy() :-
       authorizedAdvertise(?Owner,?DstIP,?Tail,?Head).
 
     route(?Owner,?SrcIP,?DstIP,?Path) :-
-      authorizedAdvertise(?Owner,?SrcIP,?DstIPRange,?Path,$Self).
+      authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,$Self).
 
     authorizedAdvertise(?Owner,?SrcIP,?DstIP,?Path,?AS):-
       eq([?Owner|?Tail],?Path),
