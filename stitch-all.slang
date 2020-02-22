@@ -20,7 +20,7 @@ defcon makeTagSubjectSet() :-
     label("tags($Version)").
   }.
 
-defpost initTagSubjectSet() :- [makeTagSubjectSet()].
+defpost postMakeTagSubjectSet() :- [makeTagSubjectSet()].
 
 defcon addTokenToTagSet(?Token, ?Tag) :-
   spec("Add a link to a tag's ID set. Invoked after delegation to this tag"),
