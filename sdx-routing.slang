@@ -14,11 +14,11 @@ defcon routeTagAclEntrySD(?Tag, ?SrcIP, ?DstIP) :-
   spec("user as tag access control list"),
   {
     routeTagAclEntry($Tag, $SrcIP, $DstIP).
-    label("RouteTagAclEntry($SrcIP)($DstIP)($Version)").
+    label("routeTagAclEntry($SrcIP)($DstIP)($Version)").
   }.
 
 defcon sdPolicySet(?SrcPrefix,?DstPrefix) :-
-  ?TagAclToken := label("RouteTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
+  ?TagAclToken := label("routeTagAclEntry(?SrcPrefix)(?DstPrefix)($Version)"),
   ?IPToken := label("Token for IP allocation/?SrcPrefix($Version)"),
   ?AuthASPolicy := label("authz as policy($PolicyVersion)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
@@ -162,7 +162,7 @@ defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):- [advertiseRo
 defcon startRoute(?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("RouteTagAclEntry(?DstIP)($Version)"),
+  ?AuthzASACL := label("routeTagAclEntry(?DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).
@@ -178,7 +178,7 @@ defpost postInitRoute(?DstIP,?Path,?Target,?Len) :- [startRoute(?DstIP,?Path,?Ta
 defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
-  ?AuthzASACL := label("RouteTagAclEntry($SrcIP)($DstIP)($Version)"),
+  ?AuthzASACL := label("routeTagAclEntry(?SrcIP)(?DstIP)($Version)"),
   ?TagPrivPolicy := label("tag-access-policy($PolicyVersion)"),
   {
     link($Token).
