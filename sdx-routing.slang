@@ -189,39 +189,6 @@ defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target):-
 
 defpost postInitRouteSD(?SrcIP,?DstIP,?Path,?Target) :- [startRouteSD(?SrcIP,?DstIP,?Path,?Target)].
 
-//defcon linkRoute(?Token,?DstIP,?Src,?Len):-
-//  spec("link a token for an advertised path"),
-//  {
-//    link($Token).
-//    label("Path/$Src/$DstIP/$Len ($Version)").
-//  }.
-//
-//defcon addTokenPerIP(?Token,?DstIP):-
-//  {
-//    link($Token).
-//    label("Token for IP/$DstIP ($Version)").
-//  }.
-//
-//
-//defpost postPathToken(?Token,?DstIP,?Src,?Len) :- [linkRoute(?Token,?DstIP,?Src,?Len), addTokenPerIP(?Token,?DstIP)].
-//
-////void using Src and SrcIP at the same time, as the interpreter mistake $SrcIP for $Src + "IP"
-//defcon linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len):-
-//  spec("link a token for an advertised path"),
-//  {
-//    link($Token).
-//    label("Path/$Source/$SrcIP/$DstIP/$Len ($Version)").
-//  }.
-//
-//defcon addTokenPerIPSD(?Token,?SrcIP,?DstIP):-
-//  {
-//    link($Token).
-//    label("Token for IP/$SrcIP/$DstIP ($Version)").
-//  }.
-//
-//
-//defpost postPathTokenSD(?Token,?SrcIP,?DstIP,?Source,?Len) :- [linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len), addTokenPerIPSD(?Token,?SrcIP,?DstIP)].
-
 defguard verifyRoute(?Owner,?DstIP,?Path,?Token) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
   ?OwnPrefixPolicy := label("own prefix policy($PolicyVersion)"),
