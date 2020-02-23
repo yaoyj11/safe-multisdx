@@ -135,32 +135,30 @@ defcon routingPolicy() :-
 defpost postRoutingPolicy() :- [routingPolicy()].
 definit routingPolicy().
 
-defcon advertiseRoute(?DstIP,?Path,?Target,?Src,?Len):-
-  ?PathToken := label("Path/?Src/?DstIP/?Len ($Version)"),
+defcon advertiseRoute(?DstIP,?Path,?Target,?Token):-
   ?TagSubjectSet := label("tags($Version)"),
   {
-    link($PathToken).
+    link($Token).
     link($TagSubjectSet).
     advertise($DstIP,$Path,$Target).
-    label("Advertise/$Target/$DstIP/$Len ($Version)").
+    label("Advertise/$Target/$DstIP($Version)").
   }.
 
-defpost postAdvertise(?DstIP,?Path,?Target,?Src,?Len):- [advertiseRoute(?DstIP,?Path,?Target,?Src,?Len)].
+defpost postAdvertise(?DstIP,?Path,?Target,?Token):- [advertiseRoute(?DstIP,?Path,?Target,?Token)].
 
-defcon advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):-
-  ?PathToken := label("Path/?Source/?SrcIP/?DstIP/?Len ($Version)"),
+defcon advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Token):-
   ?TagSubjectSet := label("tags($Version)"),
   {
-    link($PathToken).
+    link($Token).
     link($TagSubjectSet).
     advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP/$Len ($Version)").
+    label("Advertise/$Target/$SrcIP/$DstIP($Version)").
   }.
 
-defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len):- [advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Source,?Len)].
+defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Token):- [advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Token)].
 
 //can not use init here
-defcon startRoute(?DstIP,?Path,?Target,?Len):-
+defcon startRoute(?DstIP,?Path,?Target):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
   ?AuthzASACL := label("sdxTagAclEntry(?DstIP)($Version)"),
@@ -171,12 +169,12 @@ defcon startRoute(?DstIP,?Path,?Target,?Len):-
     link($AuthzASPolicy).
     link($TagPrivPolicy).
     advertise($DstIP,$Path,$Target).
-    label("Advertise/$Target/$DstIP/$Len ($Version)").
+    label("Advertise/$Target/$DstIP($Version)").
   }.
 
-defpost postInitRoute(?DstIP,?Path,?Target,?Len) :- [startRoute(?DstIP,?Path,?Target,?Len)].
+defpost postStartRoute(?DstIP,?Path,?Target) :- [startRoute(?DstIP,?Path,?Target)].
 
-defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
+defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target):-
   ?Token := label("Token for IP allocation/?DstIP($Version)"),
   ?AuthzASPolicy := label("authz as policy($PolicyVersion)"),
   ?AuthzASACL := label("sdxTagAclEntry(?SrcIP)(?DstIP)($Version)"),
@@ -187,43 +185,10 @@ defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len):-
     link($AuthzASPolicy).
     link($TagPrivPolicy).
     advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP/$Len ($Version)").
+    label("Advertise/$Target/$SrcIP/$DstIP($Version)").
   }.
 
-defpost postInitRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len) :- [startRouteSD(?SrcIP,?DstIP,?Path,?Target,?Len)].
-
-defcon linkRoute(?Token,?DstIP,?Src,?Len):-
-  spec("link a token for an advertised path"),
-  {
-    link($Token).
-    label("Path/$Src/$DstIP/$Len ($Version)").
-  }.
-
-defcon addTokenPerIP(?Token,?DstIP):-
-  {
-    link($Token).
-    label("Token for IP/$DstIP ($Version)").
-  }.
-
-
-defpost postPathToken(?Token,?DstIP,?Src,?Len) :- [linkRoute(?Token,?DstIP,?Src,?Len), addTokenPerIP(?Token,?DstIP)].
-
-//void using Src and SrcIP at the same time, as the interpreter mistake $SrcIP for $Src + "IP"
-defcon linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len):-
-  spec("link a token for an advertised path"),
-  {
-    link($Token).
-    label("Path/$Source/$SrcIP/$DstIP/$Len ($Version)").
-  }.
-
-defcon addTokenPerIPSD(?Token,?SrcIP,?DstIP):-
-  {
-    link($Token).
-    label("Token for IP/$SrcIP/$DstIP ($Version)").
-  }.
-
-
-defpost postPathTokenSD(?Token,?SrcIP,?DstIP,?Source,?Len) :- [linkRouteSD(?Token,?SrcIP,?DstIP,?Source,?Len), addTokenPerIPSD(?Token,?SrcIP,?DstIP)].
+defpost postStartRouteSD(?SrcIP,?DstIP,?Path,?Target) :- [startRouteSD(?SrcIP,?DstIP,?Path,?Target)].
 
 defguard verifyRoute(?Owner,?DstIP,?Path,?Token) :-
   ?RoutingPolicyRef := label("routing policy($PolicyVersion)"),
