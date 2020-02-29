@@ -43,6 +43,10 @@ defcall postUserTagAclEntry(?ServerJVM,?ServerPrincipal,?Envs,?Tag) :-
     postUserTagAclEntry($ServerJVM,$ServerPrincipal,$Envs,$Tag).
   }.
 
+defcall postTagPrivilegePolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postTagPrivilegePolicy($ServerJVM,$ServerPrincipal,$Envs).
+  }.
 
 tagPrivDelegation(?FromJVM,?FromPrincipal,?ToJVM,?ToPrincipal,?GrantEnvs,?UpdateEnvs,?Tag,?Delegatable):-
   ?Token := postGrantTagPriv(?FromJVM,?FromPrincipal,?GrantEnvs,?ToPrincipal,?Tag,?Delegatable),
