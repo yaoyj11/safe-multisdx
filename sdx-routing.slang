@@ -140,7 +140,7 @@ defcon advertiseRoute(?DstIP,?Path,?Target,?Token):-
     link($Token).
     link($TagSubjectSet).
     advertise($DstIP,$Path,$Target).
-    label("Advertise/$Target/$DstIP($Version)").
+    label("Advertise/$Target/$Path/$DstIP($Version)").
   }.
 
 defpost postAdvertise(?DstIP,?Path,?Target,?Token):- [advertiseRoute(?DstIP,?Path,?Target,?Token)].
@@ -151,7 +151,7 @@ defcon advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Token):-
     link($Token).
     link($TagSubjectSet).
     advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP($Version)").
+    label("Advertise/$Target/$Path/$SrcIP/$DstIP($Version)").
   }.
 
 defpost postAdvertiseSD(?SrcIP,?DstIP,?Path,?Target,?Token):- [advertiseRouteSD(?SrcIP,?DstIP,?Path,?Target,?Token)].
@@ -168,7 +168,7 @@ defcon startRoute(?DstIP,?Path,?Target):-
     link($AuthzASPolicy).
     link($TagPrivPolicy).
     advertise($DstIP,$Path,$Target).
-    label("Advertise/$Target/$DstIP($Version)").
+    label("Advertise/$Target/$Path/$DstIP($Version)").
   }.
 
 defpost postInitRoute(?DstIP,?Path,?Target) :- [startRoute(?DstIP,?Path,?Target)].
@@ -184,7 +184,7 @@ defcon startRouteSD(?SrcIP,?DstIP,?Path,?Target):-
     link($AuthzASPolicy).
     link($TagPrivPolicy).
     advertise($SrcIP,$DstIP,$Path,$Target).
-    label("Advertise/$Target/$SrcIP/$DstIP($Version)").
+    label("Advertise/$Target/$Path/$SrcIP/$DstIP($Version)").
   }.
 
 defpost postInitRouteSD(?SrcIP,?DstIP,?Path,?Target) :- [startRouteSD(?SrcIP,?DstIP,?Path,?Target)].
