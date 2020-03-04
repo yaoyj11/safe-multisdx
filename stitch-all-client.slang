@@ -48,6 +48,11 @@ defcall postTagPrivilegePolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
     postTagPrivilegePolicy($ServerJVM,$ServerPrincipal,$Envs).
   }.
 
+defcall postOwnPrefixPolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postOwnPrefixPolicy($ServerJVM,$ServerPrincipal,$Envs).
+  }.
+
 tagPrivDelegation(?FromJVM,?FromPrincipal,?ToJVM,?ToPrincipal,?GrantEnvs,?UpdateEnvs,?Tag,?Delegatable):-
   ?Token := postGrantTagPriv(?FromJVM,?FromPrincipal,?GrantEnvs,?ToPrincipal,?Tag,?Delegatable),
   updateTagSet(?ToJVM,?ToPrincipal,?UpdateEnvs,?Token,?Tag).

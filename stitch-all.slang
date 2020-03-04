@@ -107,8 +107,6 @@ defcon ownPrefixPolicy():-
     label("own prefix policy($PolicyVersion)").
   }.
 
-definit ownPrefixPolicy().
-
 defpost postOwnPrefixPolicy() :- [ownPrefixPolicy()].
 
 defcon ipAllocate(?Prcpl,?Prefix,?DlgPrefix) :-
