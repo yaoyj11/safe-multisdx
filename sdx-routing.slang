@@ -110,24 +110,27 @@ defcon routingPolicy() :-
       ?SrcIP <: ?SrcIPRange,
       ?DstIP <: ?DstIPRange.
 
-    compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
-      eq([?Owner|?Tail],?Path),
+    compliantPath(?SrcOwner,?SrcIP,?DstIP,?Path) :-
+      eq([?DstOwner|?Tail],?Path),
       eq(?Tail,[]),
-      ownPrefix(?Owner, ?DstIP).
+      ownPrefix(?DstOwner, ?SupDstIP),
+      ?DstIP <: ?SupDstIP.
 
-    compliantPath(?Owner,?SrcIP,?DstIP,?Path) :-
-      eq([?Owner|?Tail],?Path),
-      compliantPath(?Owner, ?SrcIP, ?DstIP, ?Tail).
+    compliantPath(?SrcOwner,?SrcIP,?DstIP,?Path) :-
+      eq([?SrcOwner|?Tail],?Path),
+      compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Tail).
 
-    compliantPath(?Owner, ?SrcIP, ?DstIP, ?Path) :-
+    compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Path) :-
       eq([?Head|?Tail],?Path),
       eq(?Tail,[]),
-      ?Owner: authorizedAS(?Head, ?SrcIP, ?DstIP).
+      ?SrcOwner: authorizedAS(?Head, ?SrcIP, ?SupDstIP),
+      ?DstIP <: ?SupDstIP.
 
-    compliantPath(?Owner, ?SrcIP, ?DstIP, ?Path) :-
+    compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Path) :-
       eq([?Head|?Tail],?Path),
-      ?Owner: authorizedAS(?Head, ?SrcIP, ?DstIP),
-      compliantPath(?Owner, ?SrcIP, ?DstIP, ?Tail).
+      ?SrcOwner: authorizedAS(?Head, ?SrcIP, ?SupDstIP),
+      ?DstIP <: ?SupDstIP,
+      compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Tail).
 
     label("routing policy($PolicyVersion)").
   }.
