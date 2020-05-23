@@ -108,28 +108,54 @@ defcon memberSet() :-
 
 definit memberSet().
 
+defcon matchPolicy():-
+  spec('Local policy for matching route and policy'),
+  {
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?Nb, ?AsSet),
+      eq(?Origin, ?RouteSet).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?Nb, ?AsSet),
+      eq(?Prefix, ?RouteSet).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?Nb, ?AsSet),
+      membership(?RouteSet, ?Origin).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?Nb, ?AsSet),
+      membership(?RouteSet, ?Prefix).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?RouteSet, ?Origin),
+      membership(?AsSet, ?Nb).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?RouteSet, ?Prefix),
+      membership(?AsSet, ?Nb).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      membership(?AsSet, ?Nb),
+      membership(?RouteSet, ?Origin).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      membership(?AsSet, ?Nb),
+      membership(?RouteSet, ?Prefix).
+
+    label('macth policy($PolicyVersion)').
+
+  }.
+
 defcon importPolicy() :-
   spec('Local route import policies'),
   {
     //prefix ownership are checked when validating the route
     accept(?Nb, ?Origin, ?Prefix) :-
-      importAS(?Nb, ?Origin).
+      import(?AsSet, ?RouteSet),
+      match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    accept(?Nb, ?Origin, ?Prefix) :-
-      importASSet(?Nb, ?ASSet),
-      membership(?ASSet, ?Origin).
-
-    accept(?Nb, ?Origin, ?Prefix) :-
-      importRS(?Nb, ?RS),
-      membership(?RS, ?Prefix).
-
-    accept(?Nb, ?Origin, ?Prefix) :-
-      import(?Nb, _).
-
-    accept(?Nb, ?Origin, ?Prefix) :-
-      import(?Nb, ?Prefix).
-
-    label('local import policy($PolicyVersion)').
+    label('import policy($PolicyVersion)').
   }.
 
 definit importPolicy().
@@ -139,103 +165,31 @@ defcon exportPolicy() :-
   {
     //prefix ownership are checked when validating the route
     export(?Nb, ?Origin, ?Prefix) :-
-      exportAS(?Nb, ?Origin).
+      export(?AsSet, ?RouteSet),
+      match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    export(?Nb, ?Origin, ?Prefix) :-
-      exportASSet(?Nb, ?ASSet),
-      membership(?ASSet, ?Origin).
-
-    export(?Nb, ?Origin, ?Prefix) :-
-      exportRS(?Nb, ?RS),
-      membership(?RS, ?Prefix).
-
-    export(?Nb, ?Origin, ?Prefix) :-
-      export(?Nb, _).
-
-    export(?Nb, ?Origin, ?Prefix) :-
-      export(?Nb, ?Prefix).
-
-    label('local export policy($PolicyVersion)').
+    label('export policy($PolicyVersion)').
   }.
 
 definit exportPolicy().
 
-defcon importAS(?Nb, ?AS) :-
+
+defcon importAcl(?AsSet, ?RouteSet) :-
   spec('post import AS entry'),
   {
-    importAS($Nb, $AS).
+    import($AsSet, $RouteSet).
 
     label("Import acls($Version)").
   }.
 
-defpost postImportAS(?Nb, ?AS):- [importAS(?Nb, ?AS)].
+defpost postImport(?AsSet, ?RouteSet):- [importAcl(?AsSet, ?RouteSet)].
 
-defcon importASSet(?Nb, ?ASSet) :-
-  spec('post import AS set entry'),
+defcon exportAcl(?AsSet, ?RouteSet) :-
+  spec('post import AS entry'),
   {
-    importASSet($Nb, $ASSet).
+    export($AsSet, $RouteSet).
 
     label("Import acls($Version)").
   }.
 
-defpost postImportASSet(?Nb, ?ASSet):- [importASSet(?Nb, ?ASSet)].
-
-defcon importRS(?Nb, ?RS) :-
-  spec('post import RS entry'),
-  {
-    importRS($Nb, $RS).
-
-    label("Import acls($Version)").
-  }.
-
-defpost postImportRS(?Nb, ?RS):- [importRS(?Nb, ?RS)].
-
-defcon importPrefix(?Nb, ?Prefix) :-
-  spec('post import RS entry'),
-  {
-    importPrefix($Nb, $Prefix).
-
-    label("Import acls($Version)").
-  }.
-
-defpost postImportPrefix(?Nb, ?Prefix):- [importPrefix(?Nb, ?Prefix)].
-
-defcon exportAS(?Nb, ?AS) :-
-  spec('post export AS entry'),
-  {
-    exportAS($Nb, $AS).
-
-    label("Export acls($Version)").
-  }.
-
-defpost postExportAS(?Nb, ?AS):- [exportAS(?Nb, ?AS)].
-
-defcon exportASSet(?Nb, ?ASSet) :-
-  spec('post export AS set entry'),
-  {
-    exportASSet($Nb, $ASSet).
-
-    label("Export acls($Version)").
-  }.
-
-defpost postExportASSet(?Nb, ?ASSet):- [exportASSet(?Nb, ?ASSet)].
-
-defcon exportRS(?Nb, ?RS) :-
-  spec('post export RS entry'),
-  {
-    exportRS($Nb, $RS).
-
-    label("Export acls($Version)").
-  }.
-
-defpost postExportRS(?Nb, ?RS):- [exportRS(?Nb, ?RS)].
-
-defcon exportPrefix(?Nb, ?Prefix) :-
-  spec('post export RS entry'),
-  {
-    exportPrefix($Nb, $Prefix).
-
-    label("Export acls($Version)").
-  }.
-
-defpost postExportPrefix(?Nb, ?Prefix):- [exportPrefix(?Nb, ?Prefix)].
+defpost postExport(?AsSet, ?RouteSet):- [exportAcl(?AsSet, ?RouteSet)].
