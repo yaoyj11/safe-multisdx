@@ -1,10 +1,11 @@
 import("../sdx-routing.slang").
+import("../base.slang").
 //route set, AS set
 
 defcon makeGroupSet(?Group) :-
   spec('Construct a set for a group'),
   {
-    label("groups/$Group($PolicyVersion)").
+    label("groups/$Group($Version)").
   }.
 
 defpost postGroupSet(?Group) :- [makeGroupSet(?Group)].
@@ -65,100 +66,114 @@ defcon memberSet() :-
   {
     membership(?Group, ?User) :-
       membership(?Group, ?User, _).
-..
-   //
-   // If the group root has the membership automatically,.
-   // update the root's subject set....
-   // membership(?Group, ?User, true) :-
-   //   ?GRoot := rootPrincipal(?Group),
-   //   ?GRoot = ?User.
 
     membership(?Group, ?User, ?Delegatable) :-
-      ?GRoot := rootPrincipal(?Group),.
+      ?GRoot := rootPrincipal(?Group),
       ?GRoot: groupMember(?Group, ?User, ?Delegatable).
-....
+
     membership(?Group, ?User, ?Delegatable) :-
       ?Delegator: delegateMembership(?User, ?Group, ?Delegatable),
       membership(?Group, ?Delegator, true).
 
     membership(?Group, ?User, ?Delegatable) :-
       ?GRoot := rootPrincipal(?Group),
-      ?GRoot: nestGroup(?Group, ?ToGroup, true),.
+      ?GRoot: nestGroup(?Group, ?ToGroup, true),
       membership(?ToGroup, ?User, ?Delegatable).
 
     membership(?Group, ?User, ?Delegatable) :-
       ?GRoot := rootPrincipal(?Group),
-      ?GRoot: nestGroup(?Group, ?ToGroup, false),.
+      ?GRoot: nestGroup(?Group, ?ToGroup, false),
       ?ToGroupRoot := rootPrincipal(?ToGroup),
       ?ToGroupRoot: groupMember(?ToGroup, ?User, ?Delegatable).
 
-//
-//  These rules are redundant
-//
-//    nestGroup(?SrcGroup, ?DstGroup) :-
-//      ?SrcOwner := rootPrincipal(?SrcGroup), ?SrcOwner: nestGroup(?SrcGroup, ?DstGroup).
-//
-//    nestGroup(?SrcGroup, ?DstGroup) :-
-//      ?SrcOwner := rootPrincipal(?SrcGroup), ?SrcOwner: nestGroup(?SrcGroup, ?MidGroup),
-//      nestGroup(?MidGroup, ?DstGroup).
-//
-
-    label('standard-membership-policy($PolicyVersion)').
+    label("standard-membership-policy($PolicyVersion)").
   }.
 
 definit memberSet().
 
-defcon matchPolicy():-
+defpost postMemberSet() :- [memberSet()].
+
+defcon matchPolicy() :-
   spec('Local policy for matching route and policy'),
   {
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?Nb, ?AsSet),
-      eq(?Origin, ?RouteSet).
+      matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?Nb, ?AsSet),
-      eq(?Prefix, ?RouteSet).
+      matchB(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?Nb, ?AsSet),
-      membership(?RouteSet, ?Origin).
+      matchC(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?Nb, ?AsSet),
-      membership(?RouteSet, ?Prefix).
+      matchD(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?RouteSet, ?Origin),
-      membership(?AsSet, ?Nb).
+      matchE(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?RouteSet, ?Prefix),
-      membership(?AsSet, ?Nb).
+      matchF(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      membership(?AsSet, ?Nb),
-      membership(?RouteSet, ?Origin).
+      matchG(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      membership(?AsSet, ?Nb),
-      membership(?RouteSet, ?Prefix).
+      matchH(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    label('macth policy($PolicyVersion)').
+    matchA(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      eq(?B, ?E).
 
+    matchB(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      eq(?C, ?E).
+
+    matchC(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      membership(?E, ?B).
+
+    matchD(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      membership(?E, ?C).
+
+    matchE(?A, ?B, ?C, ?D, ?E):-
+      eq(?E, ?B),
+      membership(?D, ?A).
+
+    matchF(?A, ?B, ?C, ?D, ?E):-
+      eq(?E, ?C),
+      membership(?D, ?A).
+
+    matchG(?A, ?B, ?C, ?D, ?E):-
+      membership(?D, ?A),
+      membership(?E, ?C).
+
+    matchH(?A, ?B, ?C, ?D, ?E):-
+      membership(?D, ?A),
+      membership(?E, ?B).
+
+
+    label("match policy($PolicyVersion)").
   }.
+
+definit matchPolicy().
+
+defpost postMatchPolicy() :- [matchPolicy()].
 
 defcon importPolicy() :-
   spec('Local route import policies'),
   {
     //prefix ownership are checked when validating the route
-    accept(?Nb, ?Origin, ?Prefix) :-
+    import(?Nb, ?Origin, ?Prefix) :-
       import(?AsSet, ?RouteSet),
       match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    label('import policy($PolicyVersion)').
+    label("import policy($PolicyVersion)").
   }.
 
 definit importPolicy().
+
+defpost postImportPolicy() :- [importPolicy()].
 
 defcon exportPolicy() :-
   spec('Local route import policies'),
@@ -168,10 +183,12 @@ defcon exportPolicy() :-
       export(?AsSet, ?RouteSet),
       match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    label('export policy($PolicyVersion)').
+    label("export policy($PolicyVersion)").
   }.
 
 definit exportPolicy().
+
+defpost postExportPolicy() :- [exportPolicy()].
 
 
 defcon importAcl(?AsSet, ?RouteSet) :-
@@ -179,17 +196,53 @@ defcon importAcl(?AsSet, ?RouteSet) :-
   {
     import($AsSet, $RouteSet).
 
-    label("Import acls($Version)").
+    label("import acls($Version)").
   }.
 
-defpost postImport(?AsSet, ?RouteSet):- [importAcl(?AsSet, ?RouteSet)].
+defpost postImportAcl(?AsSet, ?RouteSet):- [importAcl(?AsSet, ?RouteSet)].
 
 defcon exportAcl(?AsSet, ?RouteSet) :-
   spec('post import AS entry'),
   {
     export($AsSet, $RouteSet).
 
-    label("Import acls($Version)").
+    label("export acls($Version)").
   }.
 
-defpost postExport(?AsSet, ?RouteSet):- [exportAcl(?AsSet, ?RouteSet)].
+defpost postExportAcl(?AsSet, ?RouteSet):- [exportAcl(?AsSet, ?RouteSet)].
+
+defguard importRoute(?Nb, ?Origin, ?Prefix) :-
+  ?NbSubjectSet := label(?Nb, "subject(?Nb)($Version)"),
+  ?OriginSubjectSet := label(?Origin, "subject(?Origin)($Version)"),
+  ?ImportAclSet := label("import acls($Version)"),
+  ?ImportPolicySet := label("import policy($PolicyVersion)"),
+  ?MatchPolicy := label("match policy($PolicyVersion)"),
+  ?MemberSet := label("standard-membership-policy($PolicyVersion)"),
+  {
+    link($NbSubjectSet).
+    link($OriginSubjectSet).
+    link($MatchPolicy).
+    link($ImportAclSet).
+    link($MemberSet).
+    link($ImportPolicySet).
+
+    import($Nb, $Origin, $Prefix)?
+  }.
+
+defguard exportRoute(?Nb, ?Origin, ?Prefix) :-
+  ?NbSubjectSet := label(?Nb, "subject(?Nb)($Version)"),
+  ?OriginSubjectSet := label(?Origin, "subject(?Origin)($Version)"),
+  ?ExportAclSet := label("export acls($Version)"),
+  ?ExportPolicySet := label("export policy($PolicyVersion)"),
+  ?MatchPolicy := label("match policy($PolicyVersion)"),
+  ?MemberSet := label("standard-membership-policy($PolicyVersion)"),
+  {
+    link($NbSubjectSet).
+    link($OriginSubjectSet).
+    link($MatchPolicy).
+    link($MemberSet).
+    link($ExportAclSet).
+    link($ExportPolicySet).
+
+    export($Nb, $Origin, $Prefix)?
+  }.

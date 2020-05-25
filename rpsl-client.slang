@@ -1,5 +1,25 @@
 import("../sdx-routing-client.slang").
 
+defcall postMatchPolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postMatchPolicy($ServerJVM,$ServerPrincipal,$Envs).
+  }.
+
+defcall postImportPolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postImportPolicy($ServerJVM,$ServerPrincipal,$Envs).
+  }.
+
+defcall postExportPolicy(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postExportPolicy($ServerJVM,$ServerPrincipal,$Envs).
+  }.
+
+defcall postMemberSet(?ServerJVM,?ServerPrincipal,?Envs) :-
+  {
+    postMemberSet($ServerJVM,$ServerPrincipal,$Envs).
+  }.
+
 defcall postGroupSet(?ServerJVM, ?ServerPrincipal, ?Envs, ?Group) :-
   {
     postGroupSet($ServerJVM, $ServerPrincipal, $Envs, $Group).
@@ -12,12 +32,17 @@ defcall updateGroupSet(?ServerJVM, ?ServerPrincipal, ?Envs, ?Token, ?Group) :-
 
 defcall postGroupMember(?ServerJVM, ?ServerPrincipal, ?Envs, ?GroupId, ?SubjectId, ?Delegatable) :-
   {
-    postGroupMember($ServerJVM, $ServerPrincipal, $Envs, $GroupId, $SubjectId, $Delegatable). 
-  }. 
+    postGroupMember($ServerJVM, $ServerPrincipal, $Envs, $GroupId, $SubjectId, $Delegatable).
+  }.
 
-groupMember(?GAJVM, ?GA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?GroupId, ?Delegatable) :- 
+groupMember(?GAJVM, ?GA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?GroupId, ?Delegatable) :-
   ?Token := postGroupMember(?GAJVM, ?GA, ?PostEnvs, ?GroupId, ?SubjectId, ?Delegatable),
   updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
+
+routeSetMember(?GAJVM, ?GA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?GroupId, ?Prefix, ?Delegatable) :-
+  ?Token := postGroupMember(?GAJVM, ?GA, ?PostEnvs, ?GroupId, ?Prefix, ?Delegatable),
+  updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
+
 
 defcall postGroupDelegation(?ServerJVM, ?ServerPrincipal, ?Envs, ?GroupId, ?ToGroupId, ?Delegatable) :-
   {
@@ -40,42 +65,23 @@ delegateMembership(?ServerJVM, ?ServerPrincipal, ?SubjectJVM, ?SubjectId, ?PostE
   updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
 
-defcall postImportAS(?Nb, ?AS) :-
+defcall postImportAcl(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
   {
-     postImportAS($Nb, $AS).
+     postImportAcl($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
   }.
 
-defcall postImportASSet(?Nb, ?ASSet) :-
+defcall postExportAcl(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
   {
-     postImportASSet($Nb, $ASSet).
+     postExportAcl($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
   }.
 
-defcall postImportRS(?Nb, ?RS) :-
+
+defcall importRoute(?ServerJVM, ?ServerPrincipal, ?Envs, ?Nb, ?Origin, ?Prefix) :-
   {
-     postImportRS($Nb, $RS).
+    importRoute($ServerJVM, $ServerPrincipal, $Envs, $Nb, $Origin, $Prefix).
   }.
 
-defcall postImportPrefix(?Nb, ?Prefix) :-
+defcall exportRoute(?ServerJVM, ?ServerPrincipal, ?Envs, ?Nb, ?Origin, ?Prefix) :-
   {
-     postImportPrefix($Nb, $Prefix).
-  }.
-
-defcall postExportAS(?Nb, ?AS) :-
-  {
-     postExportAS($Nb, $AS).
-  }.
-
-defcall postExportASSet(?Nb, ?ASSet) :-
-  {
-     postExportASSet($Nb, $ASSet).
-  }.
-
-defcall postExportRS(?Nb, ?RS) :-
-  {
-     postExportRS($Nb, $RS).
-  }.
-
-defcall postExportPrefix(?Nb, ?Prefix) :-
-  {
-     postExportPrefix($Nb, $Prefix).
+    exportRoute($ServerJVM, $ServerPrincipal, $Envs, $Nb, $Origin, $Prefix).
   }.
