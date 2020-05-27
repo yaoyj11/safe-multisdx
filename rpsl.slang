@@ -97,35 +97,61 @@ defcon matchPolicy() :-
   spec('Local policy for matching route and policy'),
   {
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      asMatch(?AsSet, ?Nb),
-      routeMatch(?RouteSet, ?Origin, ?Prefix).
+      matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    asMatch(?AsSet, ?Nb) :-
-      eq(?AsSet, ?Nb).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchB(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    asMatch(?AsSet, ?Nb) :-
-      membership(?AsSet, ?Nb).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchC(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    routeMatch(?RouteSet, ?Origin, ?Prefix) :-
-      eq(?RouteSet, "any").
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchD(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    routeMatch(?RouteSet, ?Origin, ?Prefix) :-
-      originMatch(?RouteSet, ?Origin).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchE(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    routeMatch(?RouteSet, ?Origin, ?Prefix) :-
-      prefixMatch(?RouteSet, ?Origin).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchF(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    prefixMatch(?RouteSet, ?Origin, ?Prefix) :-
-      eq(?RouteSet, ?Prefix).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchG(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    prefixMatch(?RouteSet, ?Origin, ?Prefix) :-
-      membership(?RouteSet, ?Prefix).
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      matchH(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
-    originMatch(?RouteSet, ?Origin, ?Prefix) :-
-      eq(?RouteSet, ?Origin).
+    matchA(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      eq(?B, ?E).
 
-    originMatch(?RouteSet, ?Origin, ?Prefix) :-
-      membership(?RouteSet, ?Origin).
+    matchB(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      eq(?C, ?E).
+
+    matchC(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      membership(?E, ?B).
+
+    matchD(?A, ?B, ?C, ?D, ?E):-
+      eq(?A, ?D),
+      membership(?E, ?C).
+
+    matchE(?A, ?B, ?C, ?D, ?E):-
+      eq(?E, ?B),
+      membership(?D, ?A).
+
+    matchF(?A, ?B, ?C, ?D, ?E):-
+      eq(?E, ?C),
+      membership(?D, ?A).
+
+    matchG(?A, ?B, ?C, ?D, ?E):-
+      membership(?D, ?A),
+      membership(?E, ?C).
+
+    matchH(?A, ?B, ?C, ?D, ?E):-
+      membership(?D, ?A),
+      membership(?E, ?B).
+
 
     label("match policy($PolicyVersion)").
   }.
