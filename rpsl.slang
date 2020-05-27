@@ -96,6 +96,15 @@ defpost postMemberSet() :- [memberSet()].
 defcon matchPolicy() :-
   spec('Local policy for matching route and policy'),
   {
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?Nb, ?AsSet),
+      eq(?RouteSet, "any").
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      membership(?AsSet, ?Nb),
+      eq(?RouteSet, "any").
+
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
       matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
@@ -119,6 +128,7 @@ defcon matchPolicy() :-
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
       matchH(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+
 
     matchA(?A, ?B, ?C, ?D, ?E):-
       eq(?A, ?D),
