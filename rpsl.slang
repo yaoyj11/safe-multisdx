@@ -161,12 +161,11 @@ defcon matchPolicy() :-
 
     matchG(?A, ?B, ?C, ?D, ?E):-
       membership(?D, ?A),
-      membership(?E, ?C).
+      membership(?E, ?B).
 
     matchH(?A, ?B, ?C, ?D, ?E):-
       membership(?D, ?A),
-      membership(?E, ?B).
-
+      membership(?E, ?C).
 
     label("match policy($PolicyVersion)").
   }.
