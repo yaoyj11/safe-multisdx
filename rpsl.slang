@@ -102,12 +102,14 @@ defcon matchPolicy() :-
       eq(?RouteSet, "any").
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      membership(?AsSet, ?Nb),
-      eq(?RouteSet, "any").
+      ne(?AsSet, ?Nb),
+      eq(?RouteSet, "any"),
+      membership(?AsSet, ?Nb).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
       eq(?RouteSet, "peeras"),
       eq(?Nb, ?Origin),
+      ne(?AsSet, ?Nb),
       membership(?AsSet, ?Nb).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
@@ -145,25 +147,33 @@ defcon matchPolicy() :-
 
     matchC(?A, ?B, ?C, ?D, ?E):-
       eq(?A, ?D),
+      ne(?E, ?B),
       membership(?E, ?B).
 
     matchD(?A, ?B, ?C, ?D, ?E):-
       eq(?A, ?D),
+      ne(?E, ?C),
       membership(?E, ?C).
 
     matchE(?A, ?B, ?C, ?D, ?E):-
       eq(?E, ?B),
+      ne(?D,?A),
       membership(?D, ?A).
 
     matchF(?A, ?B, ?C, ?D, ?E):-
       eq(?E, ?C),
+      ne(?D, ?A),
       membership(?D, ?A).
 
     matchG(?A, ?B, ?C, ?D, ?E):-
+      ne(?D, ?A),
+      ne(?E, ?B),
       membership(?D, ?A),
       membership(?E, ?B).
 
     matchH(?A, ?B, ?C, ?D, ?E):-
+      ne(?D, ?A),
+      ne(?E, ?C),
       membership(?D, ?A),
       membership(?E, ?C).
 
@@ -177,6 +187,7 @@ defpost postMatchPolicy() :- [matchPolicy()].
 defcon importPolicy() :-
   spec('Local route import policies'),
   {
+
     //prefix ownership are checked when validating the route
     import(?Nb, ?Origin, ?Prefix) :-
       import(?AsSet, ?RouteSet),
