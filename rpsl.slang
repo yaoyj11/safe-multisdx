@@ -106,6 +106,11 @@ defcon matchPolicy() :-
       eq(?RouteSet, "any").
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      eq(?RouteSet, "peeras"),
+      eq(?Nb, ?Origin),
+      membership(?AsSet, ?Nb).
+
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
       matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
 
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
