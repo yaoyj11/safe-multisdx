@@ -65,15 +65,42 @@ delegateMembership(?ServerJVM, ?ServerPrincipal, ?SubjectJVM, ?SubjectId, ?PostE
   updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
 
+defcall postImportAclOther(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
+  {
+     postImportAclOther($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
+  }.
+
 defcall postImportAcl(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
   {
      postImportAcl($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
+  }.
+
+groupImportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?ToGroupId, ?RouteSet) :-
+  ?Token := postImportAcl(?ServerJVM, ?SA, ?PostEnvs, ?ToGroupId, ?RouteSet),
+  updateGroupSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token, ?ToGroupId).
+
+asImportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?RouteSet) :-
+  ?Token := postImportAcl(?ServerJVM, ?SA, ?PostEnvs, ?SubjectId, ?RouteSet),
+  updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
+
+
+defcall postExportAclOther(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
+  {
+     postExportAclOther($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
   }.
 
 defcall postExportAcl(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
   {
      postExportAcl($ServerJVM, $ServerPrincipal, $Envs, $AsSet, $RouteSet).
   }.
+
+groupExportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?ToGroupId, ?RouteSet) :-
+  ?Token := postExportAcl(?ServerJVM, ?SA, ?PostEnvs, ?ToGroupId, ?RouteSet),
+  updateGroupSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token, ?ToGroupId).
+
+asExportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?RouteSet) :-
+  ?Token := postExportAcl(?ServerJVM, ?SA, ?PostEnvs, ?SubjectId, ?RouteSet),
+  updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
 
 defcall importRoute(?ServerJVM, ?ServerPrincipal, ?Envs, ?Nb, ?Origin, ?Prefix) :-

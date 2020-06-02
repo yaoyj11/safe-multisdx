@@ -216,12 +216,22 @@ definit exportPolicy().
 defpost postExportPolicy() :- [exportPolicy()].
 
 
-defcon importAcl(?AsSet, ?RouteSet) :-
+defcon importAclOther(?AsSet, ?RouteSet) :-
   spec('post import AS entry'),
   {
     import($AsSet, $RouteSet).
 
     label("import acls($Version)").
+  }.
+
+defpost postImportAclOther(?AsSet, ?RouteSet):- [importAclOther(?AsSet, ?RouteSet)].
+
+defcon importAcl(?AsSet, ?RouteSet) :-
+  spec('post import AS entry'),
+  {
+    import($AsSet, $RouteSet).
+
+    label("import acls/$AsSet($Version)").
   }.
 
 defpost postImportAcl(?AsSet, ?RouteSet):- [importAcl(?AsSet, ?RouteSet)].
@@ -231,10 +241,20 @@ defcon exportAcl(?AsSet, ?RouteSet) :-
   {
     export($AsSet, $RouteSet).
 
-    label("export acls($Version)").
+    label("export acls/$AsSet($Version)").
   }.
 
 defpost postExportAcl(?AsSet, ?RouteSet):- [exportAcl(?AsSet, ?RouteSet)].
+
+defcon exportAclOther(?AsSet, ?RouteSet) :-
+  spec('post import AS entry'),
+  {
+    export($AsSet, $RouteSet).
+
+    label("export acls($Version)").
+  }.
+
+defpost postExportAclOther(?AsSet, ?RouteSet):- [exportAclOther(?AsSet, ?RouteSet)].
 
 defguard importRoute(?Nb, ?Origin, ?Prefix) :-
   ?NbSubjectSet := label(?Nb, "subject(?Nb)($Version)"),
