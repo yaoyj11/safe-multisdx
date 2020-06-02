@@ -96,86 +96,119 @@ defpost postMemberSet() :- [memberSet()].
 defcon matchPolicy() :-
   spec('Local policy for matching route and policy'),
   {
-
     match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?Nb, ?AsSet),
+      nbMatch(?Nb, ?AsSet),
+      routeMatch(?Origin, ?Prefix, ?RouteSet).
+
+    nbMatch(?Nb, ?AsSet) :-
+      eq(?AsSet, "any").
+
+    nbMatch(?Nb, ?AsSet) :-
+      eq(?Nb, ?AsSet).
+
+    nbMatch(?Nb, ?AsSet) :-
+      membership(?AsSet, ?Nb).
+
+    routeMatch(?Origin, ?Prefix, ?RouteSet) :-
       eq(?RouteSet, "any").
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      ne(?AsSet, ?Nb),
-      eq(?RouteSet, "any"),
-      membership(?AsSet, ?Nb).
+    routeMatch(?Origin, ?Prefix, ?RouteSet) :-
+      originMatch(?RouteSet, ?Origin).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      eq(?RouteSet, "peeras"),
-      eq(?Nb, ?Origin),
-      ne(?AsSet, ?Nb),
-      membership(?AsSet, ?Nb).
+    routeMatch(?Origin, ?Prefix, ?RouteSet) :-
+      prefixMatch(?RouteSet, ?Prefix).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+    originMatch(?RouteSet, ?Origin) :-
+      eq(?RouteSet, ?Origin).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchB(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+    originMatch(?RouteSet, ?Origin) :-
+      membership(?RouteSet, ?Origin).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchC(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+    prefixMatch(?RouteSet, ?Prefix) :-
+      eq(?RouteSet, ?Prefix).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchD(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+    prefixMatch(?RouteSet, ?Prefix) :-
+      membership(?RouteSet, ?Prefix).
 
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchE(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
-
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchF(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
-
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchG(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
-
-    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
-      matchH(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
-
-
-    matchA(?A, ?B, ?C, ?D, ?E):-
-      eq(?A, ?D),
-      eq(?B, ?E).
-
-    matchB(?A, ?B, ?C, ?D, ?E):-
-      eq(?A, ?D),
-      eq(?C, ?E).
-
-    matchC(?A, ?B, ?C, ?D, ?E):-
-      eq(?A, ?D),
-      ne(?E, ?B),
-      membership(?E, ?B).
-
-    matchD(?A, ?B, ?C, ?D, ?E):-
-      eq(?A, ?D),
-      ne(?E, ?C),
-      membership(?E, ?C).
-
-    matchE(?A, ?B, ?C, ?D, ?E):-
-      eq(?E, ?B),
-      ne(?D,?A),
-      membership(?D, ?A).
-
-    matchF(?A, ?B, ?C, ?D, ?E):-
-      eq(?E, ?C),
-      ne(?D, ?A),
-      membership(?D, ?A).
-
-    matchG(?A, ?B, ?C, ?D, ?E):-
-      ne(?D, ?A),
-      ne(?E, ?B),
-      membership(?D, ?A),
-      membership(?E, ?B).
-
-    matchH(?A, ?B, ?C, ?D, ?E):-
-      ne(?D, ?A),
-      ne(?E, ?C),
-      membership(?D, ?A),
-      membership(?E, ?C).
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      eq(?Nb, ?AsSet),
+//      eq(?RouteSet, "any").
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      ne(?AsSet, ?Nb),
+//      eq(?RouteSet, "any"),
+//      membership(?AsSet, ?Nb).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      eq(?RouteSet, "peeras"),
+//      eq(?Nb, ?Origin),
+//      ne(?AsSet, ?Nb),
+//      membership(?AsSet, ?Nb).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchA(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchB(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchC(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchD(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchE(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchF(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchG(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+//      matchH(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet).
+//
+//
+//    matchA(?A, ?B, ?C, ?D, ?E):-
+//      eq(?A, ?D),
+//      eq(?B, ?E).
+//
+//    matchB(?A, ?B, ?C, ?D, ?E):-
+//      eq(?A, ?D),
+//      eq(?C, ?E).
+//
+//    matchC(?A, ?B, ?C, ?D, ?E):-
+//      eq(?A, ?D),
+//      ne(?E, ?B),
+//      membership(?E, ?B).
+//
+//    matchD(?A, ?B, ?C, ?D, ?E):-
+//      eq(?A, ?D),
+//      ne(?E, ?C),
+//      membership(?E, ?C).
+//
+//    matchE(?A, ?B, ?C, ?D, ?E):-
+//      eq(?E, ?B),
+//      ne(?D,?A),
+//      membership(?D, ?A).
+//
+//    matchF(?A, ?B, ?C, ?D, ?E):-
+//      eq(?E, ?C),
+//      ne(?D, ?A),
+//      membership(?D, ?A).
+//
+//    matchG(?A, ?B, ?C, ?D, ?E):-
+//      ne(?D, ?A),
+//      ne(?E, ?B),
+//      membership(?D, ?A),
+//      membership(?E, ?B).
+//
+//    matchH(?A, ?B, ?C, ?D, ?E):-
+//      ne(?D, ?A),
+//      ne(?E, ?C),
+//      membership(?D, ?A),
+//      membership(?E, ?C).
 
     label("match policy($PolicyVersion)").
   }.
