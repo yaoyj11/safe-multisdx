@@ -113,6 +113,10 @@ defcon matchPolicy() :-
       eq(?RouteSet, "any").
 
     routeMatch(?Origin, ?Prefix, ?RouteSet) :-
+      eq(?RouteSet, "peeras"),
+      eq(?Nb, ?Origin).
+
+    routeMatch(?Origin, ?Prefix, ?RouteSet) :-
       originMatch(?RouteSet, ?Origin).
 
     routeMatch(?Origin, ?Prefix, ?RouteSet) :-
