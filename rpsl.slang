@@ -100,6 +100,11 @@ defcon matchPolicy() :-
       nbMatch(?Nb, ?AsSet),
       routeMatch(?Origin, ?Prefix, ?RouteSet).
 
+    match(?Nb, ?Origin, ?Prefix, ?AsSet, ?RouteSet) :-
+      nbMatch(?Nb, ?AsSet),
+      eq(?RouteSet, "peeras"),
+      eq(?Nb, ?Origin).
+
     nbMatch(?Nb, ?AsSet) :-
       eq(?AsSet, "any").
 
@@ -111,10 +116,6 @@ defcon matchPolicy() :-
 
     routeMatch(?Origin, ?Prefix, ?RouteSet) :-
       eq(?RouteSet, "any").
-
-    routeMatch(?Origin, ?Prefix, ?RouteSet) :-
-      eq(?RouteSet, "peeras"),
-      eq(?Nb, ?Origin).
 
     routeMatch(?Origin, ?Prefix, ?RouteSet) :-
       originMatch(?RouteSet, ?Origin).
