@@ -120,11 +120,6 @@ defcon routingPolicy() :-
 
     compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Path) :-
       eq([?Head|?Tail],?Path),
-      eq(?Tail,[]),
-      ?SrcOwner: authorizedAS(?Head, ?SrcIP, ?DstIP).
-
-    compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Path) :-
-      eq([?Head|?Tail],?Path),
       ?SrcOwner: authorizedAS(?Head, ?SrcIP, ?DstIP),
       compliantPath(?SrcOwner, ?SrcIP, ?DstIP, ?Tail).
 
