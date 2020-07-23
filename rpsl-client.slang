@@ -43,6 +43,26 @@ routeSetMember(?GAJVM, ?GA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?Gr
   ?Token := postGroupMember(?GAJVM, ?GA, ?PostEnvs, ?GroupId, ?Prefix, ?Delegatable),
   updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
+defcall postImportCapSet(?ServerJVM, ?ServerPrincipal, ?Envs) :-
+  {
+    postImportCapSet($ServerJVM, $ServerPrincipal, $Envs).
+  }.
+
+defcall updateImportCapSet(?ServerJVM, ?ServerPrincipal, ?Envs, ?Token) :-
+  {
+    updateImportCapSet($ServerJVM, $ServerPrincipal, $Envs, $Token).
+  }.
+
+defcall postExportCapSet(?ServerJVM, ?ServerPrincipal, ?Envs) :-
+  {
+    postExportCapSet($ServerJVM, $ServerPrincipal, $Envs).
+  }.
+
+defcall updateExportCapSet(?ServerJVM, ?ServerPrincipal, ?Envs, ?Token) :-
+  {
+    updateExportCapSet($ServerJVM, $ServerPrincipal, $Envs, $Token).
+  }.
+
 
 defcall postGroupDelegation(?ServerJVM, ?ServerPrincipal, ?Envs, ?GroupId, ?ToGroupId, ?Delegatable) :-
   {
@@ -81,7 +101,7 @@ groupImportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs,
 
 asImportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?RouteSet) :-
   ?Token := postImportAcl(?ServerJVM, ?SA, ?PostEnvs, ?SubjectId, ?RouteSet),
-  updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
+  updateImportCapSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
 
 defcall postExportAclOther(?ServerJVM, ?ServerPrincipal, ?Envs, ?AsSet, ?RouteSet) :-
@@ -100,7 +120,7 @@ groupExportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs,
 
 asExportAcl(?ServerJVM, ?SA, ?SubjectJVM, ?SubjectId, ?PostEnvs, ?UpdateEnvs, ?RouteSet) :-
   ?Token := postExportAcl(?ServerJVM, ?SA, ?PostEnvs, ?SubjectId, ?RouteSet),
-  updateSubjectSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
+  updateExportCapSet(?SubjectJVM, ?SubjectId, ?UpdateEnvs, ?Token).
 
 
 defcall importRoute(?ServerJVM, ?ServerPrincipal, ?Envs, ?Nb, ?Origin, ?Prefix) :-
