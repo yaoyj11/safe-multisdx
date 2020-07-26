@@ -19,30 +19,46 @@ defcon addTokenToGroupSet(?Token, ?Group) :-
 
 defpost updateGroupSet(?Token, ?Group) :- [addTokenToGroupSet(?Token, ?Group)].
 
-defcon makeImportCapSet() :-
-  spec('Construct a set for neighbor statements accepting routes'),
+//defcon makeImportCapSet() :-
+//  spec('Construct a set for neighbor statements accepting routes'),
+//  {
+//    label("importcapset($Version)").
+//  }.
+//
+//defpost postImportCapSet() :- [makeImportCapSet()].
+//
+//defcon addTokenToImportCapSet(?Token) :-
+//  spec("Add a link to import cap set, invoked after deletation to this nsp"),
+//  {
+//    link($Token).
+//    label("importcapset($Version)").
+//  }.
+//
+//defpost updateImportCapSet(?Token) :- [addTokenToImportCapSet(?Token)].
+//
+//defcon makeExportCapSet() :-
+//  spec('Construct a set for neighbor statements exporting routes'),
+//  {
+//    label("exportcapset($Version)").
+//  }.
+//
+//defpost postExportCapSet() :- [makeExportCapSet()].
+
+defcon makeImportAclSet(?AS) :-
+  spec('make import acl set'),
   {
-    label("importcapset($Version)").
+    label("import acls/$AS($Version)").
   }.
 
-defpost postImportCapSet() :- [makeImportCapSet()].
+defpost postImportAclSet(?AS):- [makeImportAclSet(?AS)].
 
-defcon addTokenToImportCapSet(?Token) :-
-  spec("Add a link to import cap set, invoked after deletation to this nsp"),
+defcon makeExportAclSet(?AS) :-
+  spec('make export acl set'),
   {
-    link($Token).
-    label("importcapset($Version)").
+    label("export acls/$AS($Version)").
   }.
 
-defpost updateImportCapSet(?Token) :- [addTokenToImportCapSet(?Token)].
-
-defcon makeExportCapSet() :-
-  spec('Construct a set for neighbor statements exporting routes'),
-  {
-    label("exportcapset($Version)").
-  }.
-
-defpost postExportCapSet() :- [makeExportCapSet()].
+defpost postExportAclSet(?AS):- [makeExportAclSet(?AS)].
 
 defcon addTokenToExportCapSet(?Token) :-
   spec("Add a link to export cap set, invoked after deletation to this nsp"),
@@ -252,7 +268,7 @@ defguard importRoute(?Nb, ?Origin, ?Prefix) :-
   ?NbSubjectSet := label(?Nb, "subject(?Nb)($Version)"),
   ?OriginSubjectSet := label(?Origin, "subject(?Origin)($Version)"),
   ?ImportAclSet := label("import acls($Version)"),
-  ?NbImportCapSet := label(?Nb,"importcapset($Version)"),
+  ?NbImportCapSet := label("import acls/?Nb($Version)"),
   ?ImportPolicySet := label("import policy($PolicyVersion)"),
   ?MatchPolicy := label("match policy($PolicyVersion)"),
   ?MemberSet := label("standard-membership-policy($PolicyVersion)"),
@@ -272,7 +288,7 @@ defguard exportRoute(?Nb, ?Origin, ?Prefix) :-
   ?NbSubjectSet := label(?Nb, "subject(?Nb)($Version)"),
   ?OriginSubjectSet := label(?Origin, "subject(?Origin)($Version)"),
   ?ExportAclSet := label("export acls($Version)"),
-  ?NbExportCapSet := label(?Nb,"exportcapset($Version)"),
+  ?NbExportCapSet := label("export acls/?Nb($Version)"),
   ?ExportPolicySet := label("export policy($PolicyVersion)"),
   ?MatchPolicy := label("match policy($PolicyVersion)"),
   ?MemberSet := label("standard-membership-policy($PolicyVersion)"),
